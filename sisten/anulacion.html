@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anulaciones | Sistema de Préstamos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+            --danger: #2563eb;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            color: var(--dark);
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            transition: var(--transition);
+            overflow-y: auto;
+            border-right: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header img {
+            width: 40px;
+            margin-right: 12px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* Barra de búsqueda */
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .search-input-container {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: var(--card-shadow);
+            z-index: 10;
+            display: none;
+            margin-top: 1px;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .search-result-item:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Tarjeta de anulación */
+        .cancellation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--light-gray);
+            border-left: 4px solid var(--danger);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        /* Formulario de anulación */
+        .cancellation-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .form-control[readonly] {
+            background-color: var(--light);
+        }
+
+        /* Botones */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.6rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-danger {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 1px 2px 0 rgba(41, 82, 245, 0.05);
+        }
+
+        .btn-danger:hover {
+            background-color: #031de0;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(185, 68, 239, 0.1);
+        }
+
+        /* Sección de resultados */
+        .results-section {
+            margin-top: 2rem;
+        }
+
+        .results-title {
+            font-size: 1.25rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-card.secondary {
+            border-left-color: var(--gray);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        /* Menú móvil */
+        .mobile-menu-btn {
+            display: none;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 101;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .cancellation-form {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .page-header {
+                margin-top: 3rem;
+            }
+            .cancellation-form {
+                grid-template-columns: 1fr;
+            }
+            .btn {
+                flex: 1 0 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .search-container {
+                margin-bottom: 1.5rem;
+            }
+            .cancellation-card {
+                padding: 1.5rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de menú móvil -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para menú móvil -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <!-- <img src="https://via.placeholder.com/40/2563eb/ffffff?text=SP" alt="Logo Sistema Préstamos" aria-hidden="true"> -->
+            <h2>Sistema Préstamos</h2>
+        </div>
+        <nav aria-label="Main navigation">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="formulario.html" class="nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Registrar Cliente</span>
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                <a href="clientes.html" class="nav-link" >
+                    <i class="fas fa-users"></i>
+                    <span>Perfil del Cliente</span>
+                </a>
+            </li>
+
+                <li class="nav-item">
+                    <a href="despacho.html" class="nav-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>inicial prestamo</span>
+                    </a>
+                </li>
+                
+                 <li class="nav-item">
+                <a href="registrodepago.html" class="nav-link">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>Préstamos y Abonos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="prestamospagados.html" class="nav-link">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Préstamos Pagados</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="anulacion.html" class="nav-link active">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Anulaciones de facturas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="anulacionderesivo.html" class="nav-link">
+                    <i class="fas fa-ban"></i>
+                    <span>Anulaciones de recibos</span>
+                </a>
+            </li>
+
+             <li class="nav-item">
+                <a href="reimprimir.html" class="nav-link">
+                    <i class="fas fa-print"></i>
+                    <span>rimprimir factura </span>
+                </a>
+            </li>
+
+            
+            <li class="nav-item">
+                <a href="re.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>reportes</span>
+                </a>
+            </li>
+             
+                <!-- <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Pagos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reportes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </li>  -->
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content" id="mainContent">
+        <!-- Header de página -->
+        <header class="page-header">
+            <div class="page-title">
+                <h1><i class="fas fa-ban"></i> Módulo de Anulaciones de prestamos</h1>
+                <p>Registro de anulaciones de transacciones y facturas</p>
+            </div>
+        </header>
+
+        <!-- Barra de búsqueda -->
+        <div class="search-container">
+            <div class="search-input-container">
+                <input type="text" class="search-input" id="clientSearch" placeholder="Buscar por nombre, documento o ID de factura..." autocomplete="off">
+                <button class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                    <span class="search-btn-text">Buscar</span>
+                </button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <!-- Tarjeta de anulación -->
+        <div class="cancellation-card animate-fade">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-file-invoice"></i> Información para Anulación</h2>
+            </div>
+            
+            <form class="cancellation-form" id="cancellationForm">
+                <div class="form-group">
+                    <label for="invoiceId" class="required">ID de Factura</label>
+                    <input type="text" id="invoiceId" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientName">Nombre Completo</label>
+                    <input type="text" id="clientName" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientId">Documento de Identidad</label>
+                    <input type="text" id="clientId" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientAddress">Dirección</label>
+                    <input type="text" id="clientAddress" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientDepartment">Departamento</label>
+                    <input type="text" id="clientDepartment" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="originalAmount">Monto Original (RD$)</label>
+                    <input type="number" id="originalAmount" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cancellationDate">Fecha de Anulación</label>
+                    <input type="date" id="cancellationDate" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reason" class="required">Motivo de Anulación</label>
+                    <select id="reason" class="form-control" required>
+                        <option value="">Seleccione motivo...</option>
+                        <option value="error">Error en el monto</option>
+                        <option value="duplicate">Factura duplicada</option>
+                        <option value="client_request">Solicitud del cliente</option>
+                        <option value="system_error">Error del sistema</option>
+                        <option value="other">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cancellationNotes">Observaciones</label>
+                    <textarea id="cancellationNotes" class="form-control" rows="3" required></textarea>
+                </div>
+            </form>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" id="resetBtn">
+                    <i class="fas fa-undo"></i> Limpiar
+                </button>
+                <button type="submit" class="btn btn-danger" id="submitBtn">
+                    <i class="fas fa-ban"></i> Anular Transacción
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección de resultados -->
+        <!-- <div class="results-section animate-fade">
+            <h3 class="results-title"><i class="fas fa-history"></i> Últimas Anulaciones Registradas</h3>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Anulaciones Hoy</div>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-label">Monto Anulado</div>
+                    <div class="stat-value">RD$ 8,750.00</div>
+                </div>
+                <div class="stat-card secondary">
+                    <div class="stat-label">Promedio por Anulación</div>
+                    <div class="stat-value">RD$ 2,916.67</div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-outline">
+                    <i class="fas fa-file-export"></i> Exportar Reporte
+                </button>
+            </div>
+        </div> -->
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Control del menú móvil
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('active');
+                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+            }
+
+            mobileMenuBtn.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+
+            // Datos de ejemplo para transacciones
+            const transactions = [
+                { 
+                    id: 'INV-1001', 
+                    clientId: '402-1231432-5', 
+                    clientName: "Juan Pérez López", 
+                    address: "Calle Principal 123, Ciudad", 
+                    department: "Santo Domingo",
+                    amount: 5000,
+                    date: '2024-05-15'
+                },
+                { 
+                    id: 'INV-1002', 
+                    clientId: '402-9876543-1', 
+                    clientName: "María Rodríguez García", 
+                    address: "Avenida Libertad 456", 
+                    department: "Distrito Nacional",
+                    amount: 3750,
+                    date: '2024-05-14'
+                },
+                { 
+                    id: 'INV-1003', 
+                    clientId: '402-4567890-2', 
+                    clientName: "Carlos Martínez Fernández", 
+                    address: "Calle Las Flores 789", 
+                    department: "Santiago",
+                    amount: 6250,
+                    date: '2024-05-13'
+                }
+            ];
+
+            // Elementos del DOM
+            const clientSearch = document.getElementById('clientSearch');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchResults = document.getElementById('searchResults');
+            const invoiceId = document.getElementById('invoiceId');
+            const clientName = document.getElementById('clientName');
+            const clientId = document.getElementById('clientId');
+            const clientAddress = document.getElementById('clientAddress');
+            const clientDepartment = document.getElementById('clientDepartment');
+            const originalAmount = document.getElementById('originalAmount');
+            const cancellationDate = document.getElementById('cancellationDate');
+            const reason = document.getElementById('reason');
+            const cancellationNotes = document.getElementById('cancellationNotes');
+            const cancellationForm = document.getElementById('cancellationForm');
+            const resetBtn = document.getElementById('resetBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Establecer fecha actual por defecto
+            const today = new Date();
+            cancellationDate.value = today.toISOString().split('T')[0];
+
+            // Función para buscar transacciones
+            function searchTransactions(query) {
+                if (!query) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+
+                const results = transactions.filter(trans => 
+                    trans.id.toLowerCase().includes(query.toLowerCase()) || 
+                    trans.clientName.toLowerCase().includes(query.toLowerCase()) || 
+                    trans.clientId.includes(query)
+                );
+
+                displayResults(results);
+            }
+
+            // Función para mostrar resultados
+            function displayResults(results) {
+                searchResults.innerHTML = '';
+                
+                if (results.length === 0) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'search-result-item';
+                    noResults.textContent = 'No se encontraron transacciones';
+                    searchResults.appendChild(noResults);
+                } else {
+                    results.forEach(trans => {
+                        const item = document.createElement('div');
+                        item.className = 'search-result-item';
+                        item.innerHTML = `
+                            <div style="font-weight: 600;">${trans.id} - ${trans.clientName}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray);">${trans.clientId} - RD$ ${trans.amount.toLocaleString()}</div>
+                        `;
+                        
+                        item.addEventListener('click', () => {
+                            selectTransaction(trans);
+                            searchResults.style.display = 'none';
+                            clientSearch.value = '';
+                        });
+                        
+                        searchResults.appendChild(item);
+                    });
+                }
+                
+                searchResults.style.display = results.length > 0 ? 'block' : 'none';
+            }
+
+            // Función para seleccionar transacción
+            function selectTransaction(trans) {
+                invoiceId.value = trans.id;
+                clientName.value = trans.clientName;
+                clientId.value = trans.clientId;
+                clientAddress.value = trans.address;
+                clientDepartment.value = trans.department;
+                originalAmount.value = trans.amount;
+                reason.focus();
+            }
+
+            // Event listeners
+            clientSearch.addEventListener('input', () => {
+                searchTransactions(clientSearch.value);
+            });
+
+            searchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                searchTransactions(clientSearch.value);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Resetear formulario
+            resetBtn.addEventListener('click', () => {
+                cancellationForm.reset();
+                cancellationDate.value = today.toISOString().split('T')[0];
+                clientSearch.focus();
+            });
+
+            // Enviar formulario
+            cancellationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!invoiceId.value) {
+                    alert('Por favor busque y seleccione una factura para anular');
+                    return;
+                }
+                
+                if (!reason.value) {
+                    alert('Por favor seleccione un motivo de anulación');
+                    reason.focus();
+                    return;
+                }
+                
+                if (!cancellationNotes.value) {
+                    alert('Por favor ingrese las observaciones de la anulación');
+                    cancellationNotes.focus();
+                    return;
+                }
+                
+                // Simular envío exitoso
+                alert(`Factura ${invoiceId.value} anulada exitosamente. No se registrará en el perfil del cliente.`);
+                cancellationForm.reset();
+                cancellationDate.value = today.toISOString().split('T')[0];
+                clientSearch.focus();
+                
+                // Aquí iría la lógica para enviar los datos al servidor
+                // const formData = new FormData(cancellationForm);
+                // formData.append('action', 'cancel');
+                // fetch('/api/transactions', { method: 'POST', body: formData })
+                //   .then(response => response.json())
+                //   .then(data => console.log(data))
+                //   .catch(error => console.error(error));
+            });
+
+            // Mostrar animaciones
+            document.querySelectorAll('.animate-fade').forEach(el => {
+                el.style.opacity = '1';
+            });
+
+            // Manejar cambios de tamaño de pantalla
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+                
+                // Ajustar texto del botón de búsqueda en móviles
+                const searchBtnText = document.querySelector('.search-btn-text');
+                if (window.innerWidth < 576) {
+                    searchBtnText.style.display = 'none';
+                } else {
+                    searchBtnText.style.display = 'inline';
+                }
+            });
+
+            // Inicializar para responsive
+            if (window.innerWidth < 576) {
+                document.querySelector('.search-btn-text').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

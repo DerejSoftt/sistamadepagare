@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préstamos y Abonos | Sistema de Préstamos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            color: var(--dark);
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            transition: var(--transition);
+            overflow-y: auto;
+            border-right: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* Controles superiores */
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-input-container {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-success {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        /* Tabla expandible */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--light-gray);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .table-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 2px solid var(--light-gray);
+            background-color: var(--light);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+            color: var(--dark);
+        }
+
+        .data-table tr.loan-row:hover {
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .data-table tr.loan-row.expanded {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        /* Fila expandida */
+        .expanded-row {
+            display: none;
+        }
+
+        .expanded-row.show {
+            display: table-row;
+        }
+
+        .expanded-content {
+            padding: 0;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+        }
+
+        .expanded-inner {
+            padding: 1.5rem;
+        }
+
+        .loan-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Tabla de abonos dentro de la fila expandida */
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+
+        .payments-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .payments-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+        }
+
+        .payments-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .payments-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        /* Formulario de abono */
+        .payment-form {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .form-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            padding: 0.5rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .status-completed {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        .status-late {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-dark);
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+
+        .expand-btn:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .expand-btn.expanded {
+            transform: rotate(90deg);
+        }
+
+        /* Menú móvil */
+        .mobile-menu-btn {
+            display: none;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 101;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Estilos de impresión */
+        @media print {
+            body {
+                background: white;
+                font-family: 'Arial', sans-serif;
+                font-size: 12px;
+            }
+
+            .sidebar, 
+            .mobile-menu-btn, 
+            .overlay, 
+            .controls-container,
+            .action-buttons,
+            .expand-btn,
+            .action-btn,
+            .expanded-row {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .page-header {
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+            }
+
+            .table-container {
+                box-shadow: none;
+                border: 2px solid #000;
+                padding: 0;
+                border-radius: 0;
+            }
+
+            .table-header {
+                background-color: #f0f0f0;
+                border-bottom: 2px solid #000;
+                margin-bottom: 0;
+                padding: 10px;
+                text-align: center;
+            }
+
+            .data-table {
+                font-size: 11px;
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .data-table th {
+                background-color: #e0e0e0;
+                padding: 8px;
+                border: 1px solid #000;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .data-table td {
+                padding: 6px;
+                border: 1px solid #000;
+                text-align: center;
+            }
+
+            .data-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+
+            .status {
+                font-weight: bold;
+                padding: 2px 6px;
+                border-radius: 3px;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 250px;
+            }
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .page-header {
+                margin-top: 3rem;
+            }
+            .controls-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-container {
+                max-width: none;
+            }
+            .data-table th:nth-child(4),
+            .data-table td:nth-child(4),
+            .data-table th:nth-child(5),
+            .data-table td:nth-child(5) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+            .table-container {
+                padding: 1rem;
+            }
+            .data-table th:nth-child(3),
+            .data-table td:nth-child(3) {
+                display: none;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .loan-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de menú móvil -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para menú móvil -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Sistema Préstamos</h2>
+        </div>
+        <nav aria-label="Main navigation">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="formulario.html" class="nav-link">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Registrar Cliente</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="clientes.html" class="nav-link">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Perfil del Cliente</span>
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <a href="despacho.html" class="nav-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Despacho</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" aria-current="page">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Préstamos y Abonos</span>
+                    </a>
+                </li>
+                
+
+                 <li class="nav-item">
+                <a href="prestamospagados.html" class="nav-link">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Préstamos Pagados</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="anulacion.html" class="nav-link">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Anulaciones de facturas</span>
+                </a>
+            </li>
+
+
+             <li class="nav-item">
+                <a href="anulacionderesivo.html" class="nav-link">
+                    <i class="fas fa-ban"></i>
+                    <span>Anulaciones de recibos</span>
+                </a>
+            </li>
+
+             <li class="nav-item">
+                <a href="reimprimir.html" class="nav-link">
+                    <i class="fas fa-print"></i>
+                    <span>rimprimir factura </span>
+                </a>
+            </li>
+
+            
+            <li class="nav-item">
+                <a href="re.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>reportes</span>
+                </a>
+            </li>
+
+
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content" id="mainContent">
+        <!-- Header de página -->
+        <header class="page-header">
+            <div class="page-title">
+                <h1><i class="fas fa-file-invoice-dollar"></i> Préstamos y Abonos</h1>
+                <p>Gestión de préstamos con tabla expandible</p>
+            </div>
+        </header>
+
+        <!-- Controles superiores -->
+        <div class="controls-container">
+            <div class="search-container">
+                <div class="search-input-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar por cliente, número de préstamo..." autocomplete="off">
+                    <button class="search-btn" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                        <span>Buscar</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-outline" id="expandAllBtn">
+                    <i class="fas fa-expand-arrows-alt"></i> Expandir Todo
+                </button>
+                <button class="btn btn-success" id="printBtn">
+                    <i class="fas fa-print"></i> Imprimir Historial
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla expandible de préstamos -->
+        <div class="table-container animate-fade">
+            <div class="table-header">
+                <h2 class="table-title"><i class="fas fa-list"></i> Lista de Préstamos</h2>
+                <span id="totalLoans" class="badge">0 préstamos</span>
+            </div>
+            
+            <table class="data-table" id="loansTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Cliente</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                        <th>Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Progreso</th>
+                        <th style="width: 80px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se cargarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Control del menú móvil
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            function toggleMenu() {
+                sidebar.classList.toggle('active');
+                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+            }
+
+            mobileMenuBtn.addEventListener('click', toggleMenu);
+            overlay.addEventListener('click', toggleMenu);
+
+            // Datos de ejemplo para préstamos
+            const loans = [
+                {
+                    id: 1,
+                    client: "Juan Pérez López",
+                    amount: 25000,
+                    date: "2025-05-28",
+                    dueDate: "2025-09-28",
+                    status: "active",
+                    progress: 20,
+                    payments: [
+                        { date: "2025-06-28", amount: 5000, method: "Efectivo", receipt: "REC-001", user: "Admin" }
+                    ]
+                },
+                {
+                    id: 2,
+                    client: "María Rodríguez García",
+                    amount: 15000,
+                    date: "2025-05-15",
+                    dueDate: "2025-08-15",
+                    status: "active",
+                    progress: 40,
+                    payments: [
+                        { date: "2025-06-15", amount: 3000, method: "Transferencia", receipt: "REC-002", user: "Admin" },
+                        { date: "2025-07-15", amount: 3000, method: "Transferencia", receipt: "REC-003", user: "Admin" }
+                    ]
+                },
+                {
+                    id: 3,
+                    client: "Carlos Martínez Fernández",
+                    amount: 10000,
+                    date: "2025-04-10",
+                    dueDate: "2025-07-10",
+                    status: "late",
+                    progress: 30,
+                    payments: [
+                        { date: "2025-05-10", amount: 3000, method: "Efectivo", receipt: "REC-004", user: "Admin" }
+                    ]
+                },
+                {
+                    id: 4,
+                    client: "Ana Gómez Sánchez",
+                    amount: 5000,
+                    date: "2025-05-05",
+                    dueDate: "2025-08-05",
+                    status: "completed",
+                    progress: 100,
+                    payments: [
+                        { date: "2025-06-05", amount: 2500, method: "Efectivo", receipt: "REC-005", user: "Admin" },
+                        { date: "2025-07-05", amount: 2500, method: "Efectivo", receipt: "REC-006", user: "Admin" }
+                    ]
+                },
+                {
+                    id: 5,
+                    client: "Luis Hernández Díaz",
+                    amount: 30000,
+                    date: "2025-05-20",
+                    dueDate: "2025-09-20",
+                    status: "pending",
+                    progress: 0,
+                    payments: []
+                },
+                {
+                    id: 6,
+                    client: "Elena Díaz Morales",
+                    amount: 20000,
+                    date: "2025-05-10",
+                    dueDate: "2025-08-10",
+                    status: "active",
+                    progress: 60,
+                    payments: [
+                        { date: "2025-06-10", amount: 6000, method: "Efectivo", receipt: "REC-007", user: "Admin" },
+                        { date: "2025-07-10", amount: 6000, method: "Transferencia", receipt: "REC-008", user: "Admin" }
+                    ]
+                }
+            ];
+
+            let currentLoans = [...loans]; // Copia para filtros
+
+            // Función para formatear montos
+            function formatCurrency(amount) {
+                return 'RD$ ' + parseFloat(amount).toLocaleString('es-DO', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            // Función para formatear fechas
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('es-DO');
+            }
+
+            // Función para obtener el texto del estado
+            function getStatusText(status) {
+                const statusMap = {
+                    'active': 'Activo',
+                    'pending': 'Pendiente',
+                    'completed': 'Completado',
+                    'late': 'Atrasado'
+                };
+                return statusMap[status] || status;
+            }
+
+            // Función para obtener la clase CSS del estado
+            function getStatusClass(status) {
+                const classMap = {
+                    'active': 'status-active',
+                    'pending': 'status-pending',
+                    'completed': 'status-completed',
+                    'late': 'status-late'
+                };
+                return classMap[status] || '';
+            }
+
+            // Función para calcular el total pagado
+            function calculateTotalPaid(loan) {
+                return loan.payments.reduce((total, payment) => total + payment.amount, 0);
+            }
+
+            // Función para cargar la tabla de préstamos
+            function loadLoansTable(loansToShow = currentLoans) {
+                const tableBody = document.querySelector('#loansTable tbody');
+                tableBody.innerHTML = '';
+
+                loansToShow.forEach(loan => {
+                    // Fila principal del préstamo
+                    const mainRow = document.createElement('tr');
+                    mainRow.className = 'loan-row';
+                    mainRow.dataset.loanId = loan.id;
+                    
+                    mainRow.innerHTML = `
+                        <td>
+                            <button class="expand-btn" data-loan-id="${loan.id}">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </td>
+                        <td>${loan.client}</td>
+                        <td>${formatCurrency(loan.amount)}</td>
+                        <td>${formatDate(loan.date)}</td>
+                        <td>${formatDate(loan.dueDate)}</td>
+                        <td><span class="status ${getStatusClass(loan.status)}">${getStatusText(loan.status)}</span></td>
+                        <td>${loan.progress}%</td>
+                        <td>
+                            <span style="color: var(--gray);">-</span>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(mainRow);
+
+                    // Fila expandida con detalles
+                    const expandedRow = document.createElement('tr');
+                    expandedRow.className = 'expanded-row';
+                    expandedRow.dataset.loanId = loan.id;
+                    
+                    const totalPaid = calculateTotalPaid(loan);
+                    const pendingAmount = loan.amount - totalPaid;
+                    
+                    expandedRow.innerHTML = `
+                        <td colspan="8" class="expanded-content">
+                            <div class="expanded-inner">
+                                <div class="loan-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Cliente</span>
+                                        <span class="detail-value">${loan.client}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Monto Total</span>
+                                        <span class="detail-value">${formatCurrency(loan.amount)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Total Pagado</span>
+                                        <span class="detail-value">${formatCurrency(totalPaid)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Saldo Pendiente</span>
+                                        <span class="detail-value">${formatCurrency(pendingAmount)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Fecha de Emisión</span>
+                                        <span class="detail-value">${formatDate(loan.date)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Fecha de Vencimiento</span>
+                                        <span class="detail-value">${formatDate(loan.dueDate)}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="progress-container">
+                                    <div class="progress-label">
+                                        <span class="progress-text">Progreso de pago</span>
+                                        <span class="progress-text">${loan.progress}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${loan.progress}%"></div>
+                                    </div>
+                                </div>
+                                
+                                <h4 style="margin-bottom: 1rem; color: var(--primary);">
+                                    <i class="fas fa-money-bill-wave"></i> Historial de Abonos
+                                </h4>
+                                
+                                ${generatePaymentsTable(loan)}
+                            </div>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(expandedRow);
+                });
+
+                // Actualizar contador
+                document.getElementById('totalLoans').textContent = `${loansToShow.length} préstamos`;
+
+                // Agregar eventos
+                addTableEvents();
+            }
+
+            // Función para generar la tabla de abonos
+            function generatePaymentsTable(loan) {
+                if (loan.payments.length === 0) {
+                    return '<p style="text-align: center; color: var(--gray); padding: 1rem;">No hay abonos registrados</p>';
+                }
+
+                let tableHTML = `
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Monto</th>
+                                <th>Método</th>
+                                <th>Recibo</th>
+                                <th>Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                loan.payments.forEach(payment => {
+                    tableHTML += `
+                        <tr>
+                            <td>${formatDate(payment.date)}</td>
+                            <td>${formatCurrency(payment.amount)}</td>
+                            <td>${payment.method}</td>
+                            <td>${payment.receipt}</td>
+                            <td>${payment.user}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += '</tbody></table>';
+                return tableHTML;
+            }
+
+            // Función para agregar eventos a la tabla
+            function addTableEvents() {
+                // Eventos para expandir/contraer filas
+                document.querySelectorAll('.expand-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const loanId = this.dataset.loanId;
+                        const expandedRow = document.querySelector(`.expanded-row[data-loan-id="${loanId}"]`);
+                        const mainRow = document.querySelector(`.loan-row[data-loan-id="${loanId}"]`);
+                        
+                        if (expandedRow.classList.contains('show')) {
+                            expandedRow.classList.remove('show');
+                            mainRow.classList.remove('expanded');
+                            this.classList.remove('expanded');
+                        } else {
+                            expandedRow.classList.add('show');
+                            mainRow.classList.add('expanded');
+                            this.classList.add('expanded');
+                        }
+                    });
+                });
+
+                // Eliminar todos los eventos relacionados con el formulario de abonos
+
+                // Eventos para botón de agregar abono rápido
+            }
+
+            // Función de búsqueda
+            document.getElementById('searchBtn').addEventListener('click', function() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                
+                if (!searchTerm) {
+                    currentLoans = [...loans];
+                } else {
+                    currentLoans = loans.filter(loan => 
+                        loan.client.toLowerCase().includes(searchTerm) ||
+                        loan.date.includes(searchTerm) ||
+                        loan.dueDate.includes(searchTerm) ||
+                        loan.id.toString().includes(searchTerm)
+                    );
+                }
+                
+                loadLoansTable(currentLoans);
+            });
+
+            // Búsqueda en tiempo real
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                if (!searchTerm) {
+                    currentLoans = [...loans];
+                } else {
+                    currentLoans = loans.filter(loan => 
+                        loan.client.toLowerCase().includes(searchTerm) ||
+                        loan.date.includes(searchTerm) ||
+                        loan.dueDate.includes(searchTerm) ||
+                        loan.id.toString().includes(searchTerm)
+                    );
+                }
+                
+                loadLoansTable(currentLoans);
+            });
+
+            // Expandir/contraer todo
+            document.getElementById('expandAllBtn').addEventListener('click', function() {
+                const expandedRows = document.querySelectorAll('.expanded-row.show');
+                const allRows = document.querySelectorAll('.expanded-row');
+                
+                if (expandedRows.length === allRows.length) {
+                    // Contraer todo
+                    document.querySelectorAll('.expand-btn').forEach(btn => {
+                        const loanId = btn.dataset.loanId;
+                        const expandedRow = document.querySelector(`.expanded-row[data-loan-id="${loanId}"]`);
+                        const mainRow = document.querySelector(`.loan-row[data-loan-id="${loanId}"]`);
+                        
+                        expandedRow.classList.remove('show');
+                        mainRow.classList.remove('expanded');
+                        btn.classList.remove('expanded');
+                    });
+                    this.innerHTML = '<i class="fas fa-expand-arrows-alt"></i> Expandir Todo';
+                } else {
+                    // Expandir todo
+                    document.querySelectorAll('.expand-btn').forEach(btn => {
+                        const loanId = btn.dataset.loanId;
+                        const expandedRow = document.querySelector(`.expanded-row[data-loan-id="${loanId}"]`);
+                        const mainRow = document.querySelector(`.loan-row[data-loan-id="${loanId}"]`);
+                        
+                        expandedRow.classList.add('show');
+                        mainRow.classList.add('expanded');
+                        btn.classList.add('expanded');
+                    });
+                    this.innerHTML = '<i class="fas fa-compress-arrows-alt"></i> Contraer Todo';
+                }
+            });
+
+            // Función de impresión
+            document.getElementById('printBtn').addEventListener('click', function() {
+                window.print();
+            });
+
+            // Inicializar tabla
+            loadLoansTable();
+
+            // Manejar cambios de tamaño de pantalla
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

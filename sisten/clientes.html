@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préstamos Fácil - Gestión de Clientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Actualizado con el nuevo diseño */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background: white;
+            color: var(--dark);
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            transition: var(--transition);
+            overflow-y: auto;
+            border-right: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header img {
+            width: 40px;
+            margin-right: 12px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            display: none;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: var(--transition);
+            padding: 20px;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            color: var(--dark);
+            font-size: 1.8rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 2px solid var(--light-gray);
+            border-radius: 30px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        .form-row > .form-group {
+            padding-right: 15px;
+            padding-left: 15px;
+            flex: 1 0 0%;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--dark);
+            background-color: white;
+            background-clip: padding-box;
+            border: 1px solid var(--light-gray);
+            border-radius: 0.375rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+
+        select.form-control {
+            height: calc(2.25rem + 2px);
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .input-group-prepend {
+            margin-right: -1px;
+            display: flex;
+        }
+
+        .input-group-text {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--gray);
+            text-align: center;
+            white-space: nowrap;
+            background-color: var(--light);
+            border: 1px solid var(--light-gray);
+            border-radius: 0.375rem 0 0 0.375rem;
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.375rem;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, 
+                        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            color: white;
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .client-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .client-list {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        .client-card {
+            cursor: pointer;
+            border: 1px solid var(--light-gray);
+        }
+
+        .client-card.selected {
+            border: 2px solid var(--primary);
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .client-details h3 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .client-details p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .profile-view {
+            display: none;
+        }
+
+        .payment-view {
+            display: none;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--light-gray);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 2rem;
+        }
+
+        .profile-info h2 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .profile-info p {
+            color: var(--gray);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .total-debt {
+            color: var(--danger);
+        }
+
+        .total-paid {
+            color: var(--accent);
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .profile-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .detail-group {
+            margin-bottom: 15px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--gray);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: var(--dark);
+        }
+
+        .loans-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .loans-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .loans-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .loans-table tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning);
+        }
+
+        .status-paid {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--accent);
+        }
+
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payments-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .payments-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .payments-table tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .payment-method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--gray);
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .close-btn {
+                display: block;
+            }
+
+            .client-list {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row > .form-group {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .payment-receipt {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 20px;
+        }
+
+        .receipt-title {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .receipt-details {
+            margin: 20px 0;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .receipt-label {
+            font-weight: 600;
+            color: var(--gray);
+        }
+
+        .receipt-value {
+            color: var(--dark);
+        }
+
+        .receipt-total {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .receipt-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation - Actualizado -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>Sistema Préstamos</h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-view="list-view">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="formulario.html" class="nav-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Registrar Cliente</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-view="list-view">
+                    <i class="fas fa-users"></i>
+                    <span>Perfil del Cliente</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="despacho.html" class="nav-link">
+                    <i class="fas fa-history"></i>
+                    <span>Despacho</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="registrodepago.html" class="nav-link">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>Préstamos y Abonos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="prestamospagados.html" class="nav-link">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Préstamos Pagados</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="anulacion.html" class="nav-link">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Anulaciones de facturas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="anulacionderesivo.html" class="nav-link">
+                    <i class="fas fa-ban"></i>
+                    <span>Anulaciones de recibos</span>
+                </a>
+            </li>
+
+             <li class="nav-item">
+                <a href="reimprimir.html" class="nav-link">
+                    <i class="fas fa-print"></i>
+                    <span>rimprimir factura </span>
+                </a>
+            </li>
+
+            
+            <li class="nav-item">
+                <a href="re.html" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>reportes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="login.html" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Menu Toggle Button (Mobile) -->
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- List View -->
+        <div class="list-view">
+            <header class="app-header">
+                <h1 class="page-title">Clientes</h1>
+                <div class="user-menu">
+                    <div class="user-avatar">AD</div>
+                </div>
+            </header>
+
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Buscar cliente por nombre o cédula...">
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Lista de Clientes</h2>
+                </div>
+                <div class="card-body">
+                    <div class="client-list" id="clientList">
+                        <!-- Client cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile View -->
+        <div class="profile-view" id="profileView">
+            <button class="back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </button>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar">JP</div>
+                        <div class="profile-info">
+                            <h2 id="clientName">Juan Pérez</h2>
+                            <p id="clientCedula">Cédula: 001-1234567-8</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-card">
+                            <h3 class="total-debt" id="totalDebt">RD$ 20,000</h3>
+                            <p>Total Adeudado</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="total-paid" id="totalPaid">RD$ 15,000</h3>
+                            <p>Total Pagado</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="activeLoans">2</h3>
+                            <p>Préstamos Activos</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="paidLoans">1</h3>
+                            <p>Préstamos Pagados</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div>
+                            <div class="detail-group">
+                                <span class="detail-label">Teléfono</span>
+                                <span class="detail-value" id="clientPhone">809-555-1234</span>
+                            </div>
+                            <div class="detail-group">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value" id="clientEmail">juan.perez@example.com</span>
+                            </div>
+                            <div class="detail-group">
+                                <span class="detail-label">Dirección</span>
+                                <span class="detail-value" id="clientAddress">Calle Principal #123, Santo Domingo</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="detail-group">
+                                <span class="detail-label">Lugar de Trabajo</span>
+                                <span class="detail-value" id="clientWorkplace">Empresa ABC, Departamento de Ventas</span>
+                            </div>
+                            <div class="detail-group">
+                                <span class="detail-label">Posición</span>
+                                <span class="detail-value" id="clientPosition">Ejecutivo de Ventas</span>
+                            </div>
+                            <div class="detail-group">
+                                <span class="detail-label">Fecha de Registro</span>
+                                <span class="detail-value">15/05/2022</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="loans">Préstamos</button>
+                <button class="tab-btn" data-tab="payments">Pagos</button>
+            </div>
+
+            <div class="tab-content active" id="loans">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Préstamos</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-subtab="pending-loans">Pendientes</button>
+                            <button class="tab-btn" data-subtab="paid-loans">Pagados</button>
+                        </div>
+
+                        <div class="tab-content active" id="pending-loans">
+                            <table class="loans-table">
+                                <thead>
+                                    <tr>
+                                        <th>No. Factura</th>
+                                        <th>Monto</th>
+                                        <th>Pagado</th>
+                                        <th>Saldo</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingLoansTable">
+                                    <!-- Pending loans will be inserted here -->
+                                </tbody>
+                            </table>
+                            <div class="no-results" id="noPendingLoans">No hay préstamos pendientes para este cliente.</div>
+                        </div>
+
+                        <div class="tab-content" id="paid-loans">
+                            <table class="loans-table">
+                                <thead>
+                                    <tr>
+                                        <th>No. Factura</th>
+                                        <th>Monto</th>
+                                        <th>Pagado</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paidLoansTable">
+                                    <!-- Paid loans will be inserted here -->
+                                </tbody>
+                            </table>
+                            <div class="no-results" id="noPaidLoans">No hay préstamos pagados para este cliente.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="payments">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Historial de Pagos</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="payments-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Préstamo</th>
+                                    <th>Monto</th>
+                                    <th>Tipo</th>
+                                    <th>Método</th>
+                                    <th>Notas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsHistoryTable">
+                                <!-- Payments history will be inserted here -->
+                            </tbody>
+                        </table>
+                        <div class="no-results" id="noPayments">No hay registros de pagos para este cliente.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment View -->
+        <div class="payment-view" id="paymentView">
+            <button class="back-btn" id="backToProfileBtn">
+                <i class="fas fa-arrow-left"></i>
+                Volver al perfil
+            </button>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Registrar Nuevo Pago</h2>
+                </div>
+                <div class="card-body">
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="paymentLoan">Préstamo</label>
+                            <select id="paymentLoan" class="form-control" required>
+                                <option value="">Seleccionar préstamo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="paymentAmount">Monto del Pago</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">RD$</span>
+                                    </div>
+                                    <input type="number" id="paymentAmount" class="form-control" placeholder="0.00" step="0.01" min="0.01" required>
+                                </div>
+                                <small class="text-muted" id="loanBalance">Saldo pendiente: RD$ 0.00</small>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="paymentDate">Fecha de Pago</label>
+                                <input type="date" id="paymentDate" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentMethod">Método de Pago</label>
+                            <select id="paymentMethod" class="form-control" required>
+                                <option value="">Seleccionar método</option>
+                                <option value="cash">Efectivo</option>
+                                <option value="transfer">Transferencia</option>
+                                <option value="check">Cheque</option>
+                                <option value="card">Tarjeta</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentType">Tipo de Pago</label>
+                            <select id="paymentType" class="form-control" required>
+                                <option value="partial">Abono</option>
+                                <option value="full">Pago completo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentNotes">Notas</label>
+                            <textarea id="paymentNotes" class="form-control" rows="3" placeholder="Observaciones sobre el pago..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Registrar Pago
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Receipt -->
+            <div class="payment-receipt" id="paymentReceipt" style="display: none;">
+                <div class="receipt-header">
+                    <h2 class="receipt-title">Comprobante de Pago</h2>
+                    <p>Préstamos Fácil</p>
+                </div>
+                
+                <div class="receipt-details">
+                    <div class="receipt-row">
+                        <span class="receipt-label">No. Recibo:</span>
+                        <span class="receipt-value" id="receiptNumber">PAY-0001</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Fecha:</span>
+                        <span class="receipt-value" id="receiptDate">15/06/2023</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Cliente:</span>
+                        <span class="receipt-value" id="receiptClient">Juan Pérez</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Préstamo:</span>
+                        <span class="receipt-value" id="receiptLoan">FAC-0001</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Tipo de pago:</span>
+                        <span class="receipt-value" id="receiptType">Abono</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Método de pago:</span>
+                        <span class="receipt-value" id="receiptMethod">Efectivo</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Notas:</span>
+                        <span class="receipt-value" id="receiptNotes">Pago parcial del préstamo</span>
+                    </div>
+                </div>
+                
+                <div class="receipt-total">
+                    <div class="receipt-row">
+                        <span class="receipt-label">Monto pagado:</span>
+                        <span class="receipt-value" id="receiptAmount">RD$ 5,000.00</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Nuevo saldo:</span>
+                        <span class="receipt-value" id="receiptBalance">RD$ 15,000.00</span>
+                    </div>
+                </div>
+                
+                <div class="receipt-actions">
+                    <button class="btn btn-primary" id="printReceipt">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="btn btn-primary" id="newPayment">
+                        <i class="fas fa-plus"></i> Nuevo Pago
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Datos de ejemplo
+        const clients = [
+            {
+                id: 1,
+                name: "Juan Pérez",
+                cedula: "001-1234567-8",
+                address: "Calle Principal #123, Santo Domingo",
+                phone: "809-555-1234",
+                email: "juan.perez@example.com",
+                workplace: "Empresa ABC, Departamento de Ventas",
+                position: "Ejecutivo de Ventas",
+                registrationDate: "2022-05-15"
+            },
+            {
+                id: 2,
+                name: "María Rodríguez",
+                cedula: "002-9876543-1",
+                address: "Avenida Libertad #456, Santiago",
+                phone: "809-555-5678",
+                email: "maria.rodriguez@example.com",
+                workplace: "Corporación XYZ, Departamento de Finanzas",
+                position: "Contadora",
+                registrationDate: "2022-03-10"
+            },
+            {
+                id: 3,
+                name: "Carlos García",
+                cedula: "003-4567890-2",
+                address: "Calle Las Flores #789, La Vega",
+                phone: "809-555-9012",
+                email: "carlos.garcia@example.com",
+                workplace: "Industrias DEF, Departamento de Producción",
+                position: "Supervisor",
+                registrationDate: "2022-06-20"
+            }
+        ];
+
+        const loans = [
+            {
+                id: 1,
+                clientId: 1,
+                invoice: "FAC-0001",
+                amount: 25000,
+                paidAmount: 5000,
+                date: "2023-05-15",
+                status: "pending",
+                details: "Préstamo personal para compra de electrodomésticos. Tasa de interés: 12% mensual. Plazo: 6 meses."
+            },
+            {
+                id: 2,
+                clientId: 1,
+                invoice: "FAC-0002",
+                amount: 15000,
+                paidAmount: 15000,
+                date: "2023-03-10",
+                status: "paid",
+                details: "Préstamo para reparación de vehículo. Tasa de interés: 10% mensual. Pagado en su totalidad."
+            },
+            {
+                id: 3,
+                clientId: 1,
+                invoice: "FAC-0003",
+                amount: 20000,
+                paidAmount: 10000,
+                date: "2023-08-01",
+                status: "pending",
+                details: "Préstamo para gastos médicos. Tasa de interés: 8% mensual. Plazo: 3 meses."
+            },
+            {
+                id: 4,
+                clientId: 2,
+                invoice: "FAC-0004",
+                amount: 35000,
+                paidAmount: 10000,
+                date: "2023-06-20",
+                status: "pending",
+                details: "Préstamo para negocio. Tasa de interés: 15% mensual. Plazo: 4 meses."
+            }
+        ];
+
+        const payments = [
+            {
+                id: 1,
+                loanId: 1,
+                clientId: 1,
+                amount: 5000,
+                date: "2023-05-20",
+                method: "cash",
+                type: "partial",
+                notes: "Primer pago del préstamo",
+                receiptNumber: "PAY-0001"
+            },
+            {
+                id: 2,
+                loanId: 2,
+                clientId: 1,
+                amount: 15000,
+                date: "2023-03-15",
+                method: "transfer",
+                type: "full",
+                notes: "Pago completo del préstamo",
+                receiptNumber: "PAY-0002"
+            },
+            {
+                id: 3,
+                loanId: 3,
+                clientId: 1,
+                amount: 10000,
+                date: "2023-08-05",
+                method: "check",
+                type: "partial",
+                notes: "Pago inicial del préstamo",
+                receiptNumber: "PAY-0003"
+            },
+            {
+                id: 4,
+                loanId: 4,
+                clientId: 2,
+                amount: 10000,
+                date: "2023-06-25",
+                method: "card",
+                type: "partial",
+                notes: "Pago inicial del préstamo",
+                receiptNumber: "PAY-0004"
+            }
+        ];
+
+        // Variables globales
+        let currentClientId = null;
+        let currentView = 'list-view';
+        let paymentReceiptVisible = false;
+
+        // DOM Elements
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        const closeBtn = document.querySelector('.close-btn');
+        const searchInput = document.querySelector('.search-input');
+        const clientList = document.getElementById('clientList');
+        const listView = document.querySelector('.list-view');
+        const profileView = document.getElementById('profileView');
+        const backBtn = document.getElementById('backBtn');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const clientName = document.getElementById('clientName');
+        const clientCedula = document.getElementById('clientCedula');
+        const clientPhone = document.getElementById('clientPhone');
+        const clientEmail = document.getElementById('clientEmail');
+        const clientAddress = document.getElementById('clientAddress');
+        const clientWorkplace = document.getElementById('clientWorkplace');
+        const clientPosition = document.getElementById('clientPosition');
+        const totalDebt = document.getElementById('totalDebt');
+        const totalPaid = document.getElementById('totalPaid');
+        const activeLoans = document.getElementById('activeLoans');
+        const paidLoansCount = document.getElementById('paidLoans');
+        const pendingLoansTable = document.getElementById('pendingLoansTable');
+        const paidLoansTable = document.getElementById('paidLoansTable');
+        const noPendingLoans = document.getElementById('noPendingLoans');
+        const noPaidLoans = document.getElementById('noPaidLoans');
+        const paymentsHistoryTable = document.getElementById('paymentsHistoryTable');
+        const noPayments = document.getElementById('noPayments');
+        const paymentView = document.getElementById('paymentView');
+        const backToProfileBtn = document.getElementById('backToProfileBtn');
+        const paymentForm = document.getElementById('paymentForm');
+        const paymentLoanSelect = document.getElementById('paymentLoan');
+        const paymentAmount = document.getElementById('paymentAmount');
+        const paymentDate = document.getElementById('paymentDate');
+        const paymentMethod = document.getElementById('paymentMethod');
+        const paymentType = document.getElementById('paymentType');
+        const paymentNotes = document.getElementById('paymentNotes');
+        const loanBalance = document.getElementById('loanBalance');
+        const paymentReceipt = document.getElementById('paymentReceipt');
+        const receiptNumber = document.getElementById('receiptNumber');
+        const receiptDate = document.getElementById('receiptDate');
+        const receiptClient = document.getElementById('receiptClient');
+        const receiptLoan = document.getElementById('receiptLoan');
+        const receiptType = document.getElementById('receiptType');
+        const receiptMethod = document.getElementById('receiptMethod');
+        const receiptNotes = document.getElementById('receiptNotes');
+        const receiptAmount = document.getElementById('receiptAmount');
+        const receiptBalance = document.getElementById('receiptBalance');
+        const printReceiptBtn = document.getElementById('printReceipt');
+        const newPaymentBtn = document.getElementById('newPayment');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const subTabBtns = document.querySelectorAll('[data-subtab]');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            paymentDate.valueAsDate = new Date();
+            displayClients(clients);
+            setupEventListeners();
+        });
+
+        // Display clients in the list
+        function displayClients(clientsToDisplay) {
+            clientList.innerHTML = '';
+            
+            if (clientsToDisplay.length === 0) {
+                clientList.innerHTML = '<p class="no-results">No se encontraron clientes</p>';
+                return;
+            }
+            
+            clientsToDisplay.forEach(client => {
+                const initials = client.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                const clientCard = document.createElement('div');
+                clientCard.className = 'client-card card fade-in';
+                clientCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="client-info">
+                            <div class="client-avatar">${initials}</div>
+                            <div class="client-details">
+                                <h3>${client.name}</h3>
+                                <p>${client.cedula}</p>
+                                <p>${client.phone}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                clientCard.addEventListener('click', () => showClientProfile(client.id));
+                clientList.appendChild(clientCard);
+            });
+        }
+
+        // Show client profile
+        function showClientProfile(clientId) {
+            currentClientId = clientId;
+            const client = clients.find(c => c.id === clientId);
+            if (!client) return;
+            
+            const initials = client.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            profileAvatar.textContent = initials;
+            clientName.textContent = client.name;
+            clientCedula.textContent = `Cédula: ${client.cedula}`;
+            clientPhone.textContent = client.phone;
+            clientEmail.textContent = client.email;
+            clientAddress.textContent = client.address;
+            clientWorkplace.textContent = client.workplace;
+            clientPosition.textContent = client.position;
+            
+            const clientLoans = loans.filter(loan => loan.clientId === clientId);
+            const pending = clientLoans.filter(loan => loan.status === 'pending');
+            const paid = clientLoans.filter(loan => loan.status === 'paid');
+            
+            const totalDebtAmount = pending.reduce((sum, loan) => sum + (loan.amount - loan.paidAmount), 0);
+            const totalPaidAmount = paid.reduce((sum, loan) => sum + loan.paidAmount, 0) + 
+                                  pending.reduce((sum, loan) => sum + loan.paidAmount, 0);
+            
+            totalDebt.textContent = `RD$ ${totalDebtAmount.toLocaleString()}`;
+            totalPaid.textContent = `RD$ ${totalPaidAmount.toLocaleString()}`;
+            activeLoans.textContent = pending.length;
+            paidLoansCount.textContent = paid.length;
+            
+            displayLoans(pending, pendingLoansTable, noPendingLoans);
+            displayLoans(paid, paidLoansTable, noPaidLoans);
+            displayPaymentsHistory(clientId);
+            
+            switchView('profile-view');
+        }
+
+        // Display loans in a table
+        function displayLoans(loansToDisplay, tableElement, noResultsElement) {
+            tableElement.innerHTML = '';
+            
+            if (loansToDisplay.length === 0) {
+                noResultsElement.style.display = 'block';
+                return;
+            }
+            
+            noResultsElement.style.display = 'none';
+            
+            loansToDisplay.forEach(loan => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                
+                const balance = loan.amount - loan.paidAmount;
+                
+                row.innerHTML = `
+                    <td>${loan.invoice}</td>
+                    <td>RD$ ${loan.amount.toLocaleString()}</td>
+                    <td>RD$ ${loan.paidAmount.toLocaleString()}</td>
+                    ${loan.status === 'pending' ? `<td>RD$ ${balance.toLocaleString()}</td>` : ''}
+                    <td>${formatDate(loan.date)}</td>
+                    <td>
+                        <span class="status-badge ${loan.status === 'pending' ? 'status-pending' : 'status-paid'}">
+                            ${loan.status === 'pending' ? 'Pendiente' : 'Pagado'}
+                        </span>
+                    </td>
+                    <td>
+                        ${loan.status === 'pending' ? 
+                            `<button class="action-btn register-payment" data-loan-id="${loan.id}">
+                                <i class="fas fa-money-bill-wave"></i> Pagar
+                            </button>` : 
+                            `<button class="action-btn view-details" data-loan-id="${loan.id}">
+                                <i class="fas fa-eye"></i> Ver
+                            </button>`
+                        }
+                    </td>
+                `;
+                tableElement.appendChild(row);
+            });
+            
+            document.querySelectorAll('.register-payment').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const loanId = parseInt(this.getAttribute('data-loan-id'));
+                    showPaymentForm(loanId);
+                });
+            });
+            
+            document.querySelectorAll('.view-details').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const loanId = parseInt(this.getAttribute('data-loan-id'));
+                    showLoanDetails(loanId);
+                });
+            });
+        }
+
+        // Display payments history for a client
+        function displayPaymentsHistory(clientId) {
+            paymentsHistoryTable.innerHTML = '';
+            
+            const clientPayments = payments.filter(p => p.clientId === clientId);
+            
+            if (clientPayments.length === 0) {
+                noPayments.style.display = 'block';
+                return;
+            }
+            
+            noPayments.style.display = 'none';
+            
+            clientPayments.forEach(payment => {
+                const loan = loans.find(l => l.id === payment.loanId);
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                
+                row.innerHTML = `
+                    <td>${formatDate(payment.date)}</td>
+                    <td>${loan ? loan.invoice : 'Préstamo no encontrado'}</td>
+                    <td>RD$ ${payment.amount.toLocaleString()}</td>
+                    <td>${payment.type === 'partial' ? 'Abono' : 'Pago completo'}</td>
+                    <td><span class="payment-method">${getPaymentMethodName(payment.method)}</span></td>
+                    <td>${payment.notes || '-'}</td>
+                `;
+                
+                paymentsHistoryTable.appendChild(row);
+            });
+        }
+
+        // Show payment form for a specific loan
+        function showPaymentForm(loanId) {
+            const loan = loans.find(l => l.id === loanId);
+            if (!loan) return;
+            
+            paymentLoanSelect.innerHTML = '';
+            const clientLoans = loans.filter(l => l.clientId === loan.clientId && l.status === 'pending');
+            
+            clientLoans.forEach(l => {
+                const option = document.createElement('option');
+                option.value = l.id;
+                option.textContent = `${l.invoice} - Saldo: RD$ ${(l.amount - l.paidAmount).toLocaleString()}`;
+                option.selected = l.id === loanId;
+                paymentLoanSelect.appendChild(option);
+            });
+            
+            updateLoanBalance();
+            
+            switchView('payment-view');
+            paymentReceiptVisible = false;
+            paymentReceipt.style.display = 'none';
+            paymentForm.style.display = 'block';
+        }
+
+        // Update loan balance display
+        function updateLoanBalance() {
+            const loanId = parseInt(paymentLoanSelect.value);
+            if (!loanId) return;
+            
+            const loan = loans.find(l => l.id === loanId);
+            if (!loan) return;
+            
+            const balance = loan.amount - loan.paidAmount;
+            loanBalance.textContent = `Saldo pendiente: RD$ ${balance.toLocaleString()}`;
+            paymentAmount.max = balance;
+        }
+
+        // Show payment receipt
+        function showPaymentReceipt(paymentId) {
+            const payment = payments.find(p => p.id === paymentId);
+            if (!payment) return;
+            
+            const client = clients.find(c => c.id === payment.clientId);
+            const loan = loans.find(l => l.id === payment.loanId);
+            
+            receiptNumber.textContent = payment.receiptNumber;
+            receiptDate.textContent = formatDate(payment.date);
+            receiptClient.textContent = client ? client.name : 'Cliente no encontrado';
+            receiptLoan.textContent = loan ? loan.invoice : 'Préstamo no encontrado';
+            receiptType.textContent = payment.type === 'partial' ? 'Abono' : 'Pago completo';
+            receiptMethod.textContent = getPaymentMethodName(payment.method);
+            receiptNotes.textContent = payment.notes || 'Ninguna';
+            receiptAmount.textContent = `RD$ ${payment.amount.toLocaleString()}`;
+            
+            if (loan) {
+                const newBalance = loan.amount - (loan.paidAmount + (payment.type === 'partial' ? 0 : payment.amount));
+                receiptBalance.textContent = `RD$ ${newBalance.toLocaleString()}`;
+            } else {
+                receiptBalance.textContent = 'N/A';
+            }
+            
+            paymentReceiptVisible = true;
+            paymentForm.style.display = 'none';
+            paymentReceipt.style.display = 'block';
+        }
+
+        // Show loan details
+        function showLoanDetails(loanId) {
+            const loan = loans.find(l => l.id === loanId);
+            if (!loan) return;
+            
+            const client = clients.find(c => c.id === loan.clientId);
+            const clientName = client ? client.name : 'Cliente no encontrado';
+            const balance = loan.amount - loan.paidAmount;
+            
+            alert(`Detalles del Préstamo:\n\nCliente: ${clientName}\nFactura: ${loan.invoice}\nMonto Total: RD$ ${loan.amount.toLocaleString()}\nMonto Pagado: RD$ ${loan.paidAmount.toLocaleString()}\nSaldo Pendiente: RD$ ${balance.toLocaleString()}\nFecha: ${formatDate(loan.date)}\nEstado: ${loan.status === 'pending' ? 'Pendiente' : 'Pagado'}\n\nDetalles:\n${loan.details}`);
+        }
+
+        // Get payment method name
+        function getPaymentMethodName(method) {
+            switch(method) {
+                case 'cash': return 'Efectivo';
+                case 'transfer': return 'Transferencia';
+                case 'check': return 'Cheque';
+                case 'card': return 'Tarjeta';
+                default: return 'Desconocido';
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('es-ES', options);
+        }
+
+        // Generate a receipt number
+        function generateReceiptNumber() {
+            const lastPayment = payments.reduce((max, p) => Math.max(max, parseInt(p.receiptNumber.split('-')[1])), 0);
+            return `PAY-${(lastPayment + 1).toString().padStart(4, '0')}`;
+        }
+
+        // Switch between views
+        function switchView(view) {
+            currentView = view;
+            
+            listView.style.display = 'none';
+            profileView.style.display = 'none';
+            paymentView.style.display = 'none';
+            
+            switch(view) {
+                case 'list-view':
+                    listView.style.display = 'block';
+                    break;
+                case 'profile-view':
+                    profileView.style.display = 'block';
+                    break;
+                case 'payment-view':
+                    paymentView.style.display = 'block';
+                    break;
+            }
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-view') === view) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+            
+            closeBtn.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+            });
+            
+            searchInput.addEventListener('input', searchClients);
+            
+            backBtn.addEventListener('click', () => {
+                switchView('list-view');
+            });
+            
+            backToProfileBtn.addEventListener('click', () => {
+                if (paymentReceiptVisible) {
+                    paymentReceiptVisible = false;
+                    paymentReceipt.style.display = 'none';
+                    paymentForm.style.display = 'block';
+                } else {
+                    switchView('profile-view');
+                }
+            });
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            subTabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const subtabId = btn.getAttribute('data-subtab');
+                    
+                    subTabBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('[data-subtab-content]').forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.querySelector(`[data-subtab-content="${subtabId}"]`).classList.add('active');
+                });
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    const view = this.getAttribute('data-view');
+                    
+                    // Si tiene data-view, manejar la vista interna
+                    if (view) {
+                        e.preventDefault();
+                        switchView(view);
+                    } 
+                    // Si el href no es #, permitir la navegación normal
+                    else if (href !== '#') {
+                        return; // Permitir el comportamiento por defecto
+                    } else {
+                        e.preventDefault();
+                    }
+                    
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            });
+            
+            paymentLoanSelect.addEventListener('change', updateLoanBalance);
+            
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const loanId = parseInt(paymentLoanSelect.value);
+                const amount = parseFloat(paymentAmount.value);
+                const date = paymentDate.value;
+                const method = paymentMethod.value;
+                const type = paymentType.value;
+                const notes = paymentNotes.value;
+                
+                if (!loanId || !amount || !date || !method || !type) {
+                    alert('Por favor complete todos los campos requeridos');
+                    return;
+                }
+                
+                const loanIndex = loans.findIndex(l => l.id === loanId);
+                if (loanIndex === -1) return;
+                
+                const loan = loans[loanIndex];
+                const balanceBefore = loan.amount - loan.paidAmount;
+                
+                if (amount > balanceBefore) {
+                    alert(`El monto del pago (RD$ ${amount.toLocaleString()}) excede el saldo pendiente (RD$ ${balanceBefore.toLocaleString()})`);
+                    return;
+                }
+                
+                if (type === 'full' && amount !== balanceBefore) {
+                    if (confirm(`El monto no coincide exactamente con el saldo pendiente (RD$ ${balanceBefore.toLocaleString()}). ¿Desea ajustar el monto a pagar al saldo completo?`)) {
+                        paymentAmount.value = balanceBefore;
+                        return;
+                    }
+                }
+                
+                loans[loanIndex].paidAmount += amount;
+                
+                if (type === 'full' || loans[loanIndex].paidAmount >= loans[loanIndex].amount) {
+                    loans[loanIndex].status = 'paid';
+                }
+                
+                const newPayment = {
+                    id: payments.length + 1,
+                    loanId,
+                    clientId: currentClientId,
+                    amount,
+                    date,
+                    method,
+                    type,
+                    notes,
+                    receiptNumber: generateReceiptNumber()
+                };
+                
+                payments.push(newPayment);
+                showPaymentReceipt(newPayment.id);
+                this.reset();
+                paymentDate.valueAsDate = new Date();
+                updateLoanBalance();
+            });
+            
+            printReceiptBtn.addEventListener('click', function() {
+                window.print();
+            });
+            
+            newPaymentBtn.addEventListener('click', function() {
+                paymentReceiptVisible = false;
+                paymentReceipt.style.display = 'none';
+                paymentForm.style.display = 'block';
+            });
+        }
+
+        // Search clients
+        function searchClients() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (searchTerm === '') {
+                displayClients(clients);
+                return;
+            }
+            
+            const filtered = clients.filter(client => 
+                client.name.toLowerCase().includes(searchTerm) || 
+                client.cedula.toLowerCase().includes(searchTerm) ||
+                client.phone.includes(searchTerm)
+            );
+            
+            displayClients(filtered);
+        }
+
+        // Responsive adjustments
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

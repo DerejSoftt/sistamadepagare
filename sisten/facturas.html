@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagaré | Impresión Epson LX-350</title>
+    <style>
+        /* Reset y estilos base para impresión */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: white;
+            color: black;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Contenedor principal (950x550 px) */
+        .pagare-container {
+            width: 950px;
+            height: 550px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc; /* Solo para visualización en pantalla */
+        }
+
+        /* Encabezado del pagaré */
+        .pagare-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+        }
+
+        .pagare-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .company-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .company-details {
+            font-size: 11px;
+        }
+
+        /* Cuerpo del pagaré */
+        .pagare-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .pagare-col {
+            flex: 1;
+            padding: 0 5px;
+        }
+
+        .pagare-label {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .pagare-value {
+            border: 1px solid #000;
+            padding: 5px;
+            min-height: 25px;
+        }
+
+        .pagare-amount {
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Texto legal y firmas */
+        .legal-text {
+            font-size: 10px;
+            text-align: justify;
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 3px solid #000;
+            background: #f9f9f9;
+        }
+
+        .pagare-date {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 8px;
+            background: #eee;
+        }
+
+        .signature-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .signature-line {
+            width: 200px;
+            border-top: 1px solid #000;
+            text-align: center;
+            padding-top: 5px;
+        }
+
+        /* Ocultar elementos no necesarios al imprimir */
+        @media print {
+            body {
+                background: white;
+            }
+            .pagare-container {
+                border: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Contenedor del Pagaré (950x550 px) -->
+    <div class="pagare-container">
+        <!-- Encabezado -->
+        <div class="pagare-header">
+            <h2 class="pagare-title">PAGARÉ</h2>
+            <div class="company-info">
+                <div class="company-name">FINANCIERA PRÉSTAMOS RÁPIDOS, SRL</div>
+                <div class="company-details">
+                    Calle Principal #123, Santo Domingo, República Dominicana<br>
+                    RNC: 123-45678-9 | Tel: 809-555-5555
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cuerpo del documento -->
+        <div class="pagare-body">
+            <div class="pagare-row">
+                <div class="pagare-col">
+                    <div class="pagare-label">Número de Pagaré:</div>
+                    <div class="pagare-value">PR-2023-0001</div>
+                </div>
+                <div class="pagare-col">
+                    <div class="pagare-label">Fecha:</div>
+                    <div class="pagare-value">25/05/2023</div>
+                </div>
+            </div>
+            
+            <div class="pagare-row">
+                <div class="pagare-col">
+                    <div class="pagare-label">Debo y pagaré al Sr.:</div>
+                    <div class="pagare-value">FINANCIERA PRÉSTAMOS RÁPIDOS, SRL</div>
+                </div>
+            </div>
+            
+            <div class="pagare-row">
+                <div class="pagare-col">
+                    <div class="pagare-label">La suma de:</div>
+                    <div class="pagare-value pagare-amount">RD$ 25,000.00</div>
+                </div>
+                <div class="pagare-col">
+                    <div class="pagare-label">Monto en letras:</div>
+                    <div class="pagare-value">VEINTICINCO MIL PESOS DOMINICANOS CON 00/100</div>
+                </div>
+            </div>
+            
+            <div class="pagare-row">
+                <div class="pagare-col">
+                    <div class="pagare-label">Nombre del Deudor:</div>
+                    <div class="pagare-value">María Rodríguez García</div>
+                </div>
+                <div class="pagare-col">
+                    <div class="pagare-label">Documento de Identidad:</div>
+                    <div class="pagare-value">402-9876543-1</div>
+                </div>
+            </div>
+            
+            <div class="pagare-row">
+                <div class="pagare-col">
+                    <div class="pagare-label">Dirección:</div>
+                    <div class="pagare-value">Avenida Libertad 456, Santo Domingo, República Dominicana</div>
+                </div>
+            </div>
+            
+            <!-- Texto legal -->
+            <div class="legal-text">
+                Valor recibido a mi entera satisfacción y que me comprometo a pagar en la fecha indicada. Esta obligación devengará intereses de 12% anual en caso de mora. Esta obligación se regirá por las disposiciones establecidas en nuestras normas de contratación, de acuerdo al artículo 1306 del Código Civil Dominicano, pudiendo ser exigido su cumplimiento judicialmente, afectando todos mis bienes habidos y por haber, con renuncia del fuero de domicilio y de cualquier otra ley que pudiera favorecerme.
+            </div>
+            
+            <!-- Fecha de vencimiento -->
+            <div class="pagare-date">
+                FECHA DE VENCIMIENTO: 120 DÍAS (25/09/2023)
+            </div>
+            
+            <!-- Firmas -->
+            <div class="signature-area">
+                <div class="signature-line">Firma del Deudor</div>
+                <div class="signature-line">Firma del Acreedor</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón de impresión (visible solo en pantalla) -->
+    <div class="no-print" style="text-align: center; margin-top: 20px;">
+        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px;">
+            Imprimir Pagaré
+        </button>
+    </div>
+</body>
+</html>
