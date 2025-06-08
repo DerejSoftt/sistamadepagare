@@ -555,7 +555,7 @@
              <li class="nav-item">
                 <a href="reimprimir.html" class="nav-link">
                     <i class="fas fa-print"></i>
-                    <span>rimprimir factura </span>
+                    <span>Reimprimir factura</span>
                 </a>
             </li>
 
@@ -563,21 +563,9 @@
             <li class="nav-item">
                 <a href="re.html" class="nav-link">
                     <i class="fas fa-chart-bar"></i>
-                    <span>reportes</span>
+                    <span>Reportes</span>
                 </a>
             </li>
-                <!-- <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Reportes</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>Configuración</span>
-                    </a>
-                </li>  -->
                 <li class="nav-item">
                     <a href="login.html" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i>
@@ -632,239 +620,261 @@
                     <input type="text" id="clientAddress" class="form-control" readonly>
                 </div>
                 
-                 <div class="form-group">
-                    <label for="deliveryMethod">Departamento</label>
-                    <select id="deliveryMethod" class="form-control">
-                        <option value="">Seleccione departmento...</option>
-                        <option value="Entregado">ayuntamiento</option>
-                        <option value="pago">ferquido</option>
+                <div class="form-group">
+                    <label for="departamento">Departamento</label>
+                    <select id="department" name="departamento " class="form-control" required>
+                        <option value="">Seleccione departamento...</option>
+                        <option value="ayuntamiento">Ayuntamiento</option>
+                        <option value="ferquido">Ferquido</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="amount" class="required">Monto a Entregar (RD$)</label>
-                    <input type="number" id="amount" class="form-control" required min="1">
+                    <label for="monto" class="required">Monto a Entregar (RD$)</label>
+                    <input type="number" id="amount" name="monto" class="form-control" required min="1">
                 </div>
                 
                 <div class="form-group">
-                    <label for="deliveryDate">Fecha de Entrega</label>
-                    <input type="date" id="deliveryDate" class="form-control">
+                    <label for="fecha_registro">Fecha de Entrega</label>
+                    <input type="date" id="deliveryDate" name=" fecha_registro" class="form-control" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="deliveryMethod">Método de pago</label>
-                    <select id="deliveryMethod" class="form-control">
-                        <option value="">Seleccione de pago...</option>
-                        <option value="cash">Efectivo</option>
-                        <option value="transfer">Transferencia Bancaria</option>
-                        <option value="check">Cheque</option>
+                    <label for="metodo_pago">Método de pago</label>
+                    <select id="paymentMethod" name="metodo_pago" class="form-control" required>
+                        <option value="">Seleccione método de pago...</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia Bancaria</option>
+                        <option value="cheque">Cheque</option>
                     </select>
                 </div>
-
                 
                 <div class="form-group">
                     <label for="notes">Observaciones</label>
                     <textarea id="notes" class="form-control" rows="3"></textarea>
                 </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="resetBtn">
+                        <i class="fas fa-undo"></i> Limpiar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-check-circle"></i> Registrar Despacho
+                    </button>
+                </div>
             </form>
-            
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline" id="resetBtn">
-                    <i class="fas fa-undo"></i> Limpiar
-                </button>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="fas fa-check-circle"></i> Registrar Despacho
-                </button>
-            </div>
         </div>
-
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Control del menú móvil
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+  document.addEventListener('DOMContentLoaded', function() {
+    // Control del menú móvil
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
-                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+
+    mobileMenuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // Elementos del formulario
+    const clientSearch = document.getElementById('clientSearch');
+    const searchResults = document.getElementById('searchResults');
+    const clientName = document.getElementById('clientName');
+    const clientId = document.getElementById('clientId');
+    const clientAddress = document.getElementById('clientAddress');
+    const amount = document.getElementById('amount');
+    const deliveryDate = document.getElementById('deliveryDate');
+    const paymentMethod = document.getElementById('paymentMethod');
+    const department = document.getElementById('department');
+    const notes = document.getElementById('notes');
+    const dispatchForm = document.getElementById('dispatchForm');
+    const resetBtn = document.getElementById('resetBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Establecer fecha actual por defecto
+    const today = new Date();
+    deliveryDate.value = today.toISOString().split('T')[0];
+
+    // Función para buscar clientes
+    async function searchClients(query) {
+        if (!query || query.length < 3) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch('/buscar-clientes/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ query: query })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                displayResults(data.results);
+            } else {
+                console.error('Error en búsqueda:', data.error);
+                displayResults([]);
             }
+        } catch (error) {
+            console.error('Error al buscar clientes:', error);
+            displayResults([]);
+        }
+    }
 
-            mobileMenuBtn.addEventListener('click', toggleMenu);
-            overlay.addEventListener('click', toggleMenu);
-
-            // Datos de ejemplo para clientes
-            const clients = [
-                { id: 1, name: "Juan Pérez López", doc: "402-1231432-5", address: "Calle Principal 123, Ciudad", department: "Santo Domingo" },
-                { id: 2, name: "María Rodríguez García", doc: "402-9876543-1", address: "Avenida Libertad 456", department: "Distrito Nacional" },
-                { id: 3, name: "Carlos Martínez Fernández", doc: "402-4567890-2", address: "Calle Las Flores 789", department: "Santiago" },
-                { id: 4, name: "Ana Gómez Sánchez", doc: "402-3456789-3", address: "Avenida Independencia 321", department: "La Vega" },
-                { id: 5, name: "Luis Hernández Díaz", doc: "402-2345678-4", address: "Calle San Martín 654", department: "San Cristóbal" }
-            ];
-
-            // Elementos del DOM
-            const clientSearch = document.getElementById('clientSearch');
-            const searchBtn = document.getElementById('searchBtn');
-            const searchResults = document.getElementById('searchResults');
-            const clientName = document.getElementById('clientName');
-            const clientId = document.getElementById('clientId');
-            const clientAddress = document.getElementById('clientAddress');
-            const clientDepartment = document.getElementById('clientDepartment');
-            const amount = document.getElementById('amount');
-            const deliveryDate = document.getElementById('deliveryDate');
-            const deliveryMethod = document.getElementById('deliveryMethod');
-            const notes = document.getElementById('notes');
-            const dispatchForm = document.getElementById('dispatchForm');
-            const resetBtn = document.getElementById('resetBtn');
-            const submitBtn = document.getElementById('submitBtn');
-
-            // Establecer fecha actual por defecto
-            const today = new Date();
-            deliveryDate.value = today.toISOString().split('T')[0];
-
-            // Función para buscar clientes
-            function searchClients(query) {
-                if (!query) {
+    // Mostrar resultados de búsqueda
+    function displayResults(results) {
+        searchResults.innerHTML = '';
+        
+        if (results.length === 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'search-result-item';
+            noResults.textContent = 'No se encontraron clientes';
+            searchResults.appendChild(noResults);
+        } else {
+            results.forEach(client => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <div style="font-weight: 600;">${client.nombre}</div>
+                    <div style="font-size: 0.85rem; color: var(--gray);">${client.documento}</div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    selectClient(client);
                     searchResults.style.display = 'none';
-                    return;
+                    clientSearch.value = '';
+                });
+                
+                searchResults.appendChild(item);
+            });
+        }
+        
+        searchResults.style.display = 'block';
+    }
+
+    // Seleccionar cliente
+    function selectClient(client) {
+        clientName.value = client.nombre;
+        clientId.value = client.documento;
+        clientAddress.value = client.direccion || '';
+        amount.focus();
+    }
+
+    // Función para obtener cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-
-                const results = clients.filter(client => 
-                    client.name.toLowerCase().includes(query.toLowerCase()) || 
-                    client.doc.includes(query)
-                );
-
-                displayResults(results);
             }
+        }
+        return cookieValue;
+    }
 
-            // Función para mostrar resultados
-            function displayResults(results) {
-                searchResults.innerHTML = '';
-                
-                if (results.length === 0) {
-                    const noResults = document.createElement('div');
-                    noResults.className = 'search-result-item';
-                    noResults.textContent = 'No se encontraron clientes';
-                    searchResults.appendChild(noResults);
-                } else {
-                    results.forEach(client => {
-                        const item = document.createElement('div');
-                        item.className = 'search-result-item';
-                        item.innerHTML = `
-                            <div style="font-weight: 600;">${client.name}</div>
-                            <div style="font-size: 0.85rem; color: var(--gray);">${client.doc}</div>
-                        `;
-                        
-                        item.addEventListener('click', () => {
-                            selectClient(client);
-                            searchResults.style.display = 'none';
-                            clientSearch.value = '';
-                        });
-                        
-                        searchResults.appendChild(item);
-                    });
-                }
-                
-                searchResults.style.display = results.length > 0 ? 'block' : 'none';
-            }
+    // Event listeners para búsqueda
+    clientSearch.addEventListener('input', () => {
+        searchClients(clientSearch.value);
+    });
 
-            // Función para seleccionar cliente
-            function selectClient(client) {
-                clientName.value = client.name;
-                clientId.value = client.doc;
-                clientAddress.value = client.address;
-                clientDepartment.value = client.department;
-                amount.focus();
-            }
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+            searchResults.style.display = 'none';
+        }
+    });
 
-            // Event listeners
-            clientSearch.addEventListener('input', () => {
-                searchClients(clientSearch.value);
-            });
+    // Resetear formulario
+    resetBtn.addEventListener('click', () => {
+        dispatchForm.reset();
+        deliveryDate.value = today.toISOString().split('T')[0];
+        clientSearch.value = '';
+        clientSearch.focus();
+    });
 
-            searchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                searchClients(clientSearch.value);
-            });
+    // Validación del monto
+    amount.addEventListener('input', () => {
+        if (amount.value < 0) {
+            amount.value = '';
+        }
+    });
 
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-container')) {
-                    searchResults.style.display = 'none';
-                }
-            });
-
-            // Resetear formulario
-            resetBtn.addEventListener('click', () => {
-                dispatchForm.reset();
-                deliveryDate.value = today.toISOString().split('T')[0];
-                clientSearch.focus();
-            });
-
-            // Enviar formulario
-            dispatchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!clientName.value) {
-                    alert('Por favor seleccione un cliente');
-                    return;
-                }
-                
-                if (!amount.value || amount.value <= 0) {
-                    alert('Por favor ingrese un monto válido');
-                    amount.focus();
-                    return;
-                }
-                
-                if (!deliveryMethod.value) {
-                    alert('Por favor seleccione un método de entrega');
-                    deliveryMethod.focus();
-                    return;
-                }
-                
-                // Simular envío exitoso
-                alert(`Despacho de RD$ ${amount.value} registrado exitosamente para ${clientName.value}`);
-                dispatchForm.reset();
-                deliveryDate.value = today.toISOString().split('T')[0];
-                clientSearch.focus();
-                
-                // Aquí iría la lógica para enviar los datos al servidor
-                // const formData = new FormData(dispatchForm);
-                // fetch('/api/dispatch', { method: 'POST', body: formData })
-                //   .then(response => response.json())
-                //   .then(data => console.log(data))
-                //   .catch(error => console.error(error));
-            });
-
-            // Mostrar animaciones
-            document.querySelectorAll('.animate-fade').forEach(el => {
-                el.style.opacity = '1';
-            });
-
-            // Manejar cambios de tamaño de pantalla
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.remove('active');
-                    overlay.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-                
-                // Ajustar texto del botón de búsqueda en móviles
-                const searchBtnText = document.querySelector('.search-btn-text');
-                if (window.innerWidth < 576) {
-                    searchBtnText.style.display = 'none';
-                } else {
-                    searchBtnText.style.display = 'inline';
-                }
-            });
-
-            // Inicializar para responsive
-            if (window.innerWidth < 576) {
-                document.querySelector('.search-btn-text').style.display = 'none';
-            }
+    // Enviar formulario
+  dispatchForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    
+    // Validaciones previas...
+    
+    try {
+        const formData = {
+            cliente_id: clientId.value,
+            monto: parseFloat(amount.value),
+            fecha_despacho: deliveryDate.value,
+            metodo_pago: paymentMethod.value,
+            departamento: department.value,
+            observaciones: notes.value || ''
+        };
+        
+        const response = await fetch('/registrar-despacho/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
         });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Redirigir a la página de factura con el ID del préstamo
+            window.location.href = `/factura/${data.prestamo_id}/`;
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al conectar con el servidor');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Registrar Despacho';
+    }
+});
+
+    // Manejar cambios de tamaño de pantalla
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
+
+    // Función para formatear monto (opcional)
+    function formatAmount(value) {
+        return new Intl.NumberFormat('es-DO', {
+            style: 'currency',
+            currency: 'DOP'
+        }).format(value);
+    }
+});
     </script>
 </body>
 </html>

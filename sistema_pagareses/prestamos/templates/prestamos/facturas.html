@@ -127,77 +127,87 @@
     </style>
 </head>
 <body>
-    <!-- Contenedor del Pagaré (950x550 px) -->
     <div class="pagare-container">
-        <!-- Encabezado -->
         <div class="pagare-header">
             <h2 class="pagare-title">PAGARÉ</h2>
             <div class="company-info">
-                <div class="company-name">FINANCIERA PRÉSTAMOS RÁPIDOS, SRL</div>
+                <div class="company-name">{{ empresa.nombre }}</div>
                 <div class="company-details">
-                    Calle Principal #123, Santo Domingo, República Dominicana<br>
-                    RNC: 123-45678-9 | Tel: 809-555-5555
+                    {{ empresa.direccion }}<br>
+                    RNC: {{ empresa.rnc }} | Tel: {{ empresa.telefono }}
                 </div>
             </div>
         </div>
         
-        <!-- Cuerpo del documento -->
         <div class="pagare-body">
+            <!-- Número de factura y fecha -->
             <div class="pagare-row">
                 <div class="pagare-col">
                     <div class="pagare-label">Número de Pagaré:</div>
-                    <div class="pagare-value">PR-2023-0001</div>
+                    <div class="pagare-value">{{ prestamo.numero_factura }}</div>
                 </div>
                 <div class="pagare-col">
                     <div class="pagare-label">Fecha:</div>
-                    <div class="pagare-value">25/05/2023</div>
+                    <div class="pagare-value">{{ prestamo.fecha }}</div>
                 </div>
             </div>
             
+            <!-- Acreedor -->
             <div class="pagare-row">
                 <div class="pagare-col">
-                    <div class="pagare-label">Debo y pagaré al Sr.:</div>
-                    <div class="pagare-value">FINANCIERA PRÉSTAMOS RÁPIDOS, SRL</div>
+                    <div class="pagare-label">Debo y pagaré al Sr.: VICTOR MANUEL CRUZ</div>
+                    <div class="pagare-value">{{ empresa.nombre }}</div>
                 </div>
             </div>
             
+            <!-- Monto -->
             <div class="pagare-row">
                 <div class="pagare-col">
                     <div class="pagare-label">La suma de:</div>
-                    <div class="pagare-value pagare-amount">RD$ 25,000.00</div>
+                    <div class="pagare-value pagare-amount">{{ prestamo.monto }}</div>
                 </div>
                 <div class="pagare-col">
                     <div class="pagare-label">Monto en letras:</div>
-                    <div class="pagare-value">VEINTICINCO MIL PESOS DOMINICANOS CON 00/100</div>
+                    <div class="pagare-value">{{ prestamo.monto_letras }}</div>
                 </div>
             </div>
             
+            <!-- Información del cliente -->
             <div class="pagare-row">
                 <div class="pagare-col">
                     <div class="pagare-label">Nombre del Deudor:</div>
-                    <div class="pagare-value">María Rodríguez García</div>
+                    <div class="pagare-value">{{ cliente.nombre_completo }}</div>
                 </div>
                 <div class="pagare-col">
                     <div class="pagare-label">Documento de Identidad:</div>
-                    <div class="pagare-value">402-9876543-1</div>
+                    <div class="pagare-value">{{ cliente.documento }}</div>
                 </div>
             </div>
             
             <div class="pagare-row">
                 <div class="pagare-col">
                     <div class="pagare-label">Dirección:</div>
-                    <div class="pagare-value">Avenida Libertad 456, Santo Domingo, República Dominicana</div>
+                    <div class="pagare-value">{{ cliente.direccion }}</div>
+                </div>
+                <div class="pagare-col">
+                    <div class="pagare-label">Teléfono:</div>
+                    <div class="pagare-value">{{ cliente.telefono }}</div>
                 </div>
             </div>
             
             <!-- Texto legal -->
             <div class="legal-text">
-                Valor recibido a mi entera satisfacción y que me comprometo a pagar en la fecha indicada. Esta obligación devengará intereses de 12% anual en caso de mora. Esta obligación se regirá por las disposiciones establecidas en nuestras normas de contratación, de acuerdo al artículo 1306 del Código Civil Dominicano, pudiendo ser exigido su cumplimiento judicialmente, afectando todos mis bienes habidos y por haber, con renuncia del fuero de domicilio y de cualquier otra ley que pudiera favorecerme.
+                Valor recibido a mi entera satisfacción y que me comprometo a pagar en la fecha indicada. 
+                Esta obligación devengará intereses de 12% anual en caso de mora. Esta obligación se regirá 
+                por las disposiciones establecidas en nuestras normas de contratación, de acuerdo al artículo 
+                1306 del Código Civil Dominicano, pudiendo ser exigido su cumplimiento judicialmente, 
+                afectando todos mis bienes habidos y por haber, con renuncia del fuero de domicilio y de 
+                cualquier otra ley que pudiera favorecerme.
             </div>
             
             <!-- Fecha de vencimiento -->
             <div class="pagare-date">
-                FECHA DE VENCIMIENTO: 120 DÍAS (25/09/2023)
+                FECHA DE VENCIMIENTO: {{ prestamo.fecha_vencimiento }}
             </div>
             
             <!-- Firmas -->
@@ -208,10 +218,13 @@
         </div>
     </div>
 
-    <!-- Botón de impresión (visible solo en pantalla) -->
+    <!-- Botones -->
     <div class="no-print" style="text-align: center; margin-top: 20px;">
         <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px;">
             Imprimir Pagaré
+        </button>
+        <button onclick="window.location.href='/despacho/'" style="padding: 10px 20px; font-size: 16px; margin-left: 10px;">
+            Volver a Despacho
         </button>
     </div>
 </body>
