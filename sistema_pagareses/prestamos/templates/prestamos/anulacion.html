@@ -140,6 +140,41 @@
             font-size: 0.95rem;
         }
 
+        /* Mensajes de alerta */
+        .messages-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: inherit;
+        }
+
         /* Barra de búsqueda */
         .search-container {
             width: 100%;
@@ -486,7 +521,6 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <!-- <img src="https://via.placeholder.com/40/2563eb/ffffff?text=SP" alt="Logo Sistema Préstamos" aria-hidden="true"> -->
             <h2>Sistema Préstamos</h2>
         </div>
         <nav aria-label="Main navigation">
@@ -503,80 +537,54 @@
                         <span>Registrar Cliente</span>
                     </a>
                 </li>
-
-
                 <li class="nav-item">
-                <a href="{% url 'clientes' %}" class="nav-link" >
-                    <i class="fas fa-users"></i>
-                    <span>Perfil del Cliente</span>
-                </a>
-            </li>
-
+                    <a href="{% url 'clientes' %}" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Perfil del Cliente</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="{% url 'despacho' %}" class="nav-link">
                         <i class="fas fa-money-bill-wave"></i>
                         <span>inicial prestamo</span>
                     </a>
                 </li>
-                
-                 <li class="nav-item">
-                <a href=" {% url 'registrodepago' %} " class="nav-link">
-                    <i class="fas fa-hand-holding-usd"></i>
-                    <span>Préstamos y Abonos</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href=" {% url 'prestamospagados' %}" class="nav-link">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Préstamos Pagados</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href=" {% url 'anulacion' %} " class="nav-link active">
-                    <i class="fas fa-times-circle"></i>
-                    <span>Anulaciones de facturas</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href=" {% url 'anulacionderesivo' %} " class="nav-link">
-                    <i class="fas fa-ban"></i>
-                    <span>Anulaciones de recibos</span>
-                </a>
-            </li>
-
-             <li class="nav-item">
-                <a href=" {% url 'reimprimir' %}" class="nav-link">
-                    <i class="fas fa-print"></i>
-                    <span>rimprimir factura </span>
-                </a>
-            </li>
-
-            
-            <li class="nav-item">
-                <a href=" {% url 'index' %} " class="nav-link">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>reportes</span>
-                </a>
-            </li>
-             
-                <!-- <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-history"></i>
-                        <span>Pagos</span>
+                <li class="nav-item">
+                    <a href=" {% url 'registrodepago' %} " class="nav-link">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Préstamos y Abonos</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href=" {% url 'prestamospagados' %}" class="nav-link">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Préstamos Pagados</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href=" {% url 'anulacion' %} " class="nav-link active">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Anulaciones de facturas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href=" {% url 'anulacionderesivo' %} " class="nav-link">
+                        <i class="fas fa-ban"></i>
+                        <span>Anulaciones de recibos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href=" {% url 'reimprimir' %}" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>rimprimir factura </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href=" {% url 'index' %} " class="nav-link">
                         <i class="fas fa-chart-bar"></i>
-                        <span>Reportes</span>
+                        <span>reportes</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>Configuración</span>
-                    </a>
-                </li>  -->
                 <li class="nav-item">
                     <a href=" {% url 'login' %} " class="nav-link">
                         <i class="fas fa-sign-out-alt"></i>
@@ -589,6 +597,18 @@
 
     <!-- Contenido principal -->
     <main class="main-content" id="mainContent">
+        <!-- Mensajes -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %} animate-fade">
+                {{ message }}
+                <button type="button" class="close" onclick="this.parentElement.style.display='none'">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
         <!-- Header de página -->
         <header class="page-header">
             <div class="page-title">
@@ -600,7 +620,7 @@
         <!-- Barra de búsqueda -->
         <div class="search-container">
             <div class="search-input-container">
-                <input type="text" class="search-input" id="clientSearch" placeholder="Buscar por nombre, documento o ID de factura..." autocomplete="off">
+                <input type="text" class="search-input" id="clientSearch" placeholder="Buscar por ID de factura..." autocomplete="off">
                 <button class="search-btn" id="searchBtn">
                     <i class="fas fa-search"></i>
                     <span class="search-btn-text">Buscar</span>
@@ -615,45 +635,53 @@
                 <h2 class="card-title"><i class="fas fa-file-invoice"></i> Información para Anulación</h2>
             </div>
             
-            <form class="cancellation-form" id="cancellationForm">
+            <form class="cancellation-form" id="cancellationForm" method="POST" action="{% url 'anulacion' %}">
+                {% csrf_token %}
                 <div class="form-group">
                     <label for="invoiceId" class="required">ID de Factura</label>
-                    <input type="text" id="invoiceId" class="form-control" required>
+                    <input type="text" id="invoiceId" name="invoiceId" class="form-control" required 
+                           value="{{ ultimo_prestamo.numero_factura|default:'' }}">
                 </div>
                 
                 <div class="form-group">
                     <label for="clientName">Nombre Completo</label>
-                    <input type="text" id="clientName" class="form-control" readonly>
+                    <input type="text" id="clientName" name="clientName" class="form-control" readonly 
+                           value="{{ ultimo_prestamo.cliente.nombres }} {{ ultimo_prestamo.cliente.apellidos|default:'' }}">
                 </div>
                 
                 <div class="form-group">
                     <label for="clientId">Documento de Identidad</label>
-                    <input type="text" id="clientId" class="form-control" readonly>
+                    <input type="text" id="clientId" name="clientId" class="form-control" readonly 
+                           value="{{ ultimo_prestamo.cliente.numero_identificacion|default:'' }}">
                 </div>
                 
                 <div class="form-group">
                     <label for="clientAddress">Dirección</label>
-                    <input type="text" id="clientAddress" class="form-control" readonly>
+                    <input type="text" id="clientAddress" name="clientAddress" class="form-control" readonly 
+                           value="{{ ultimo_prestamo.cliente.direccion|default:'' }}">
                 </div>
                 
                 <div class="form-group">
                     <label for="clientDepartment">Departamento</label>
-                    <input type="text" id="clientDepartment" class="form-control" readonly>
+                    <input type="text" id="clientDepartment" name="clientDepartment" class="form-control" readonly 
+                           value="{{ ultimo_prestamo.get_departamento_display|default:'' }}">
                 </div>
                 
                 <div class="form-group">
                     <label for="originalAmount">Monto Original (RD$)</label>
-                    <input type="number" id="originalAmount" class="form-control" readonly>
+                    <input type="number" id="originalAmount" name="originalAmount" class="form-control" readonly 
+                           value="{{ ultimo_prestamo.monto|default:0 }}">
                 </div>
                 
                 <div class="form-group">
                     <label for="cancellationDate">Fecha de Anulación</label>
-                    <input type="date" id="cancellationDate" class="form-control">
+                    <input type="date" id="cancellationDate" name="cancellationDate" class="form-control" 
+                           value="{% now 'Y-m-d' %}">
                 </div>
                 
                 <div class="form-group">
                     <label for="reason" class="required">Motivo de Anulación</label>
-                    <select id="reason" class="form-control" required>
+                    <select id="reason" name="reason" class="form-control" required>
                         <option value="">Seleccione motivo...</option>
                         <option value="error">Error en el monto</option>
                         <option value="duplicate">Factura duplicada</option>
@@ -665,45 +693,19 @@
                 
                 <div class="form-group">
                     <label for="cancellationNotes">Observaciones</label>
-                    <textarea id="cancellationNotes" class="form-control" rows="3" required></textarea>
+                    <textarea id="cancellationNotes" name="cancellationNotes" class="form-control" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="resetBtn">
+                        <i class="fas fa-undo"></i> Limpiar
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="submitBtn">
+                        <i class="fas fa-ban"></i> Anular Transacción
+                    </button>
                 </div>
             </form>
-            
-            <div class="form-actions">
-                <button type="button" class="btn btn-outline" id="resetBtn">
-                    <i class="fas fa-undo"></i> Limpiar
-                </button>
-                <button type="submit" class="btn btn-danger" id="submitBtn">
-                    <i class="fas fa-ban"></i> Anular Transacción
-                </button>
-            </div>
         </div>
-
-        <!-- Sección de resultados -->
-        <!-- <div class="results-section animate-fade">
-            <h3 class="results-title"><i class="fas fa-history"></i> Últimas Anulaciones Registradas</h3>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Anulaciones Hoy</div>
-                    <div class="stat-value">3</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-label">Monto Anulado</div>
-                    <div class="stat-value">RD$ 8,750.00</div>
-                </div>
-                <div class="stat-card secondary">
-                    <div class="stat-label">Promedio por Anulación</div>
-                    <div class="stat-value">RD$ 2,916.67</div>
-                </div>
-            </div>
-            
-            <div class="form-actions">
-                <button class="btn btn-outline">
-                    <i class="fas fa-file-export"></i> Exportar Reporte
-                </button>
-            </div>
-        </div> -->
     </main>
 
     <script>
@@ -722,38 +724,7 @@
             mobileMenuBtn.addEventListener('click', toggleMenu);
             overlay.addEventListener('click', toggleMenu);
 
-            // Datos de ejemplo para transacciones
-            const transactions = [
-                { 
-                    id: 'INV-1001', 
-                    clientId: '402-1231432-5', 
-                    clientName: "Juan Pérez López", 
-                    address: "Calle Principal 123, Ciudad", 
-                    department: "Santo Domingo",
-                    amount: 5000,
-                    date: '2024-05-15'
-                },
-                { 
-                    id: 'INV-1002', 
-                    clientId: '402-9876543-1', 
-                    clientName: "María Rodríguez García", 
-                    address: "Avenida Libertad 456", 
-                    department: "Distrito Nacional",
-                    amount: 3750,
-                    date: '2024-05-14'
-                },
-                { 
-                    id: 'INV-1003', 
-                    clientId: '402-4567890-2', 
-                    clientName: "Carlos Martínez Fernández", 
-                    address: "Calle Las Flores 789", 
-                    department: "Santiago",
-                    amount: 6250,
-                    date: '2024-05-13'
-                }
-            ];
-
-            // Elementos del DOM
+            // Elementos del DOM para búsqueda
             const clientSearch = document.getElementById('clientSearch');
             const searchBtn = document.getElementById('searchBtn');
             const searchResults = document.getElementById('searchResults');
@@ -770,46 +741,42 @@
             const resetBtn = document.getElementById('resetBtn');
             const submitBtn = document.getElementById('submitBtn');
 
-            // Establecer fecha actual por defecto
-            const today = new Date();
-            cancellationDate.value = today.toISOString().split('T')[0];
-
-            // Función para buscar transacciones
-            function searchTransactions(query) {
-                if (!query) {
+            // Función para buscar facturas via AJAX
+            function buscarFacturas(query) {
+                if (query.length < 2) {
                     searchResults.style.display = 'none';
                     return;
                 }
 
-                const results = transactions.filter(trans => 
-                    trans.id.toLowerCase().includes(query.toLowerCase()) || 
-                    trans.clientName.toLowerCase().includes(query.toLowerCase()) || 
-                    trans.clientId.includes(query)
-                );
-
-                displayResults(results);
+                fetch(`/buscar-facturas/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => mostrarResultados(data))
+                    .catch(error => {
+                        console.error('Error al buscar facturas:', error);
+                        searchResults.style.display = 'none';
+                    });
             }
 
-            // Función para mostrar resultados
-            function displayResults(results) {
+            // Función para mostrar resultados de búsqueda
+            function mostrarResultados(resultados) {
                 searchResults.innerHTML = '';
                 
-                if (results.length === 0) {
+                if (resultados.length === 0) {
                     const noResults = document.createElement('div');
                     noResults.className = 'search-result-item';
-                    noResults.textContent = 'No se encontraron transacciones';
+                    noResults.textContent = 'No se encontraron facturas activas';
                     searchResults.appendChild(noResults);
                 } else {
-                    results.forEach(trans => {
+                    resultados.forEach(factura => {
                         const item = document.createElement('div');
                         item.className = 'search-result-item';
                         item.innerHTML = `
-                            <div style="font-weight: 600;">${trans.id} - ${trans.clientName}</div>
-                            <div style="font-size: 0.85rem; color: var(--gray);">${trans.clientId} - RD$ ${trans.amount.toLocaleString()}</div>
+                            <div style="font-weight: 600;">${factura.id} - ${factura.cliente}</div>
+                            <div style="font-size: 0.85rem; color: var(--gray);">${factura.cedula} - RD$ ${factura.monto.toLocaleString()}</div>
                         `;
                         
                         item.addEventListener('click', () => {
-                            selectTransaction(trans);
+                            seleccionarFactura(factura);
                             searchResults.style.display = 'none';
                             clientSearch.value = '';
                         });
@@ -818,30 +785,31 @@
                     });
                 }
                 
-                searchResults.style.display = results.length > 0 ? 'block' : 'none';
+                searchResults.style.display = resultados.length > 0 ? 'block' : 'none';
             }
 
-            // Función para seleccionar transacción
-            function selectTransaction(trans) {
-                invoiceId.value = trans.id;
-                clientName.value = trans.clientName;
-                clientId.value = trans.clientId;
-                clientAddress.value = trans.address;
-                clientDepartment.value = trans.department;
-                originalAmount.value = trans.amount;
+            // Función para seleccionar una factura de los resultados
+            function seleccionarFactura(factura) {
+                invoiceId.value = factura.id;
+                clientName.value = factura.cliente;
+                clientId.value = factura.cedula;
+                clientAddress.value = factura.direccion;
+                clientDepartment.value = factura.departamento;
+                originalAmount.value = factura.monto;
                 reason.focus();
             }
 
-            // Event listeners
+            // Event listeners para la búsqueda
             clientSearch.addEventListener('input', () => {
-                searchTransactions(clientSearch.value);
+                buscarFacturas(clientSearch.value);
             });
 
             searchBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                searchTransactions(clientSearch.value);
+                buscarFacturas(clientSearch.value);
             });
 
+            // Cerrar resultados al hacer clic fuera
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.search-container')) {
                     searchResults.style.display = 'none';
@@ -851,44 +819,17 @@
             // Resetear formulario
             resetBtn.addEventListener('click', () => {
                 cancellationForm.reset();
+                // Restaurar los valores del último préstamo
+                invoiceId.value = "{{ ultimo_prestamo.numero_factura|default:'' }}";
+                clientName.value = "{{ ultimo_prestamo.cliente.nombres }} {{ ultimo_prestamo.cliente.apellidos|default:'' }}";
+                clientId.value = "{{ ultimo_prestamo.cliente.cedula|default:'' }}";
+                clientAddress.value = "{{ ultimo_prestamo.cliente.direccion|default:'' }}";
+                clientDepartment.value = "{{ ultimo_prestamo.get_departamento_display|default:'' }}";
+                originalAmount.value = "{{ ultimo_prestamo.monto|default:0 }}";
+                
+                const today = new Date();
                 cancellationDate.value = today.toISOString().split('T')[0];
                 clientSearch.focus();
-            });
-
-            // Enviar formulario
-            cancellationForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!invoiceId.value) {
-                    alert('Por favor busque y seleccione una factura para anular');
-                    return;
-                }
-                
-                if (!reason.value) {
-                    alert('Por favor seleccione un motivo de anulación');
-                    reason.focus();
-                    return;
-                }
-                
-                if (!cancellationNotes.value) {
-                    alert('Por favor ingrese las observaciones de la anulación');
-                    cancellationNotes.focus();
-                    return;
-                }
-                
-                // Simular envío exitoso
-                alert(`Factura ${invoiceId.value} anulada exitosamente. No se registrará en el perfil del cliente.`);
-                cancellationForm.reset();
-                cancellationDate.value = today.toISOString().split('T')[0];
-                clientSearch.focus();
-                
-                // Aquí iría la lógica para enviar los datos al servidor
-                // const formData = new FormData(cancellationForm);
-                // formData.append('action', 'cancel');
-                // fetch('/api/transactions', { method: 'POST', body: formData })
-                //   .then(response => response.json())
-                //   .then(data => console.log(data))
-                //   .catch(error => console.error(error));
             });
 
             // Mostrar animaciones

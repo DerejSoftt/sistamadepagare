@@ -175,7 +175,7 @@
             <!-- Información del cliente -->
             <div class="pagare-row">
                 <div class="pagare-col">
-                    <div class="pagare-label">Nombre del Deudor:</div>
+                    <div class="pagare-label">Nombre del cliente:</div>
                     <div class="pagare-value">{{ cliente.nombre_completo }}</div>
                 </div>
                 <div class="pagare-col">
@@ -189,10 +189,14 @@
                     <div class="pagare-label">Dirección:</div>
                     <div class="pagare-value">{{ cliente.direccion }}</div>
                 </div>
-                <div class="pagare-col">
-                    <div class="pagare-label">Teléfono:</div>
-                    <div class="pagare-value">{{ cliente.telefono }}</div>
-                </div>
+                 <div class="pagare-col">
+        <div class="pagare-label">Departamento:</div>
+        <div class="pagare-value">{{ prestamo.departamento }}</div>
+    </div>
+    <div class="pagare-col">
+        <div class="pagare-label">Observaciones:</div>
+        <div class="pagare-value">{{ prestamo.observaciones }}</div>
+    </div>
             </div>
             
             <!-- Texto legal -->
@@ -212,7 +216,7 @@
             
             <!-- Firmas -->
             <div class="signature-area">
-                <div class="signature-line">Firma del Deudor</div>
+                <div class="signature-line">Firma del Cliente </div>
                 <div class="signature-line">Firma del Acreedor</div>
             </div>
         </div>
