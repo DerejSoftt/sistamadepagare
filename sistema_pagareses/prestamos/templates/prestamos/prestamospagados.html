@@ -118,7 +118,7 @@
             margin-left: 280px;
             padding: 1.5rem;
             transition: var(--transition);
-            min-width: 0; /* Permite que el contenido se contraiga */
+            min-width: 0;
             width: calc(100% - 280px);
         }
 
@@ -293,7 +293,7 @@
 
         .loans-table {
             width: 100%;
-            min-width: 800px; /* Ancho mínimo para evitar que se comprima demasiado */
+            min-width: 800px;
             border-collapse: collapse;
             font-size: 0.9rem;
         }
@@ -335,6 +335,11 @@
         .badge-success {
             background-color: #d1fae5;
             color: #065f46;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
         }
 
         .badge-danger {
@@ -408,6 +413,10 @@
         }
 
         /* Recibos */
+        .receipts-section {
+            margin-top: 2rem;
+        }
+
         .receipts-title {
             font-size: 1.1rem;
             font-weight: 600;
@@ -420,7 +429,7 @@
 
         .receipts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1rem;
         }
 
@@ -430,6 +439,9 @@
             border-radius: 8px;
             padding: 1rem;
             transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .receipt-card:hover {
@@ -438,21 +450,51 @@
         }
 
         .receipt-number {
-            font-size: 0.8rem;
-            color: var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
             margin-bottom: 0.25rem;
         }
 
         .receipt-amount {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--dark);
-            margin-bottom: 0.25rem;
+            margin: 0.5rem 0;
         }
 
         .receipt-date {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .receipt-method {
             font-size: 0.8rem;
             color: var(--gray);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed var(--light-gray);
+        }
+
+        .receipt-notes {
+            font-size: 0.85rem;
+            color: var(--dark);
+            background-color: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.75rem;
+        }
+
+        .no-receipts {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-style: italic;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px dashed var(--light-gray);
         }
 
         /* Paginación */
@@ -611,7 +653,7 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             .receipts-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             }
         }
 
@@ -777,15 +819,12 @@
                         <span>Perfil del Cliente</span>
                     </a>
                 </li>
-
                 <li class="nav-item">
-                <a href="despacho.html" class="nav-link">
-                    <i class="fas fa-history"></i>
-                    <span>Despacho</span>
-                </a>
-            </li>
-
-
+                    <a href="despacho.html" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Despacho</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="registrodepago.html" class="nav-link">
                         <i class="fas fa-hand-holding-usd"></i>
@@ -798,36 +837,30 @@
                         <span>Préstamos Pagados</span>
                     </a>
                 </li>
-               
-
                 <li class="nav-item">
-                <a href="anulacion.html" class="nav-link">
-                    <i class="fas fa-times-circle"></i>
-                    <span>Anulaciones de facturas</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="anulacionderesivo.html" class="nav-link">
-                    <i class="fas fa-ban"></i>
-                    <span>Anulaciones de recibos</span>
-                </a>
-            </li>
-
-             <li class="nav-item">
-                <a href="reimprimir.html" class="nav-link">
-                    <i class="fas fa-print"></i>
-                    <span>rimprimir factura </span>
-                </a>
-            </li>
-
-            
-            <li class="nav-item">
-                <a href="re.html" class="nav-link">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>reportes</span>
-                </a>
-            </li>
-               
+                    <a href="anulacion.html" class="nav-link">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Anulaciones de facturas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="anulacionderesivo.html" class="nav-link">
+                        <i class="fas fa-ban"></i>
+                        <span>Anulaciones de recibos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reimprimir.html" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>Reimprimir factura</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="re.html" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reportes</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="login.html" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i>
@@ -878,40 +911,131 @@
                             <th style="width: 40px"></th>
                             <th>Cliente</th>
                             <th>Monto</th>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Pago</th>
+                            <th>Fecha Despacho</th>
+                            <th>Fecha Vencimiento</th>
                             <th>Estado</th>
                             <th>Total Pagado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="loansTableBody">
-                        <!-- Los datos se cargarán dinámicamente con JavaScript -->
+                        {% for loan in loans %}
+                        <tr {% if loan.estado == 'INACTIVO' %}class="disabled"{% endif %}>
+                            <td>
+                                <span class="expand-icon" data-id="{{ loan.id }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            </td>
+                            <td>{{ loan.cliente.nombres }} {{ loan.cliente.apellidos }}</td>
+                            <td>RD$ {{ loan.monto|floatformat:2 }}</td>
+                            <td>{{ loan.fecha_despacho|date:"d/m/Y" }}</td>
+                            <td>{{ loan.fecha_vencimiento|date:"d/m/Y" }}</td>
+                            <td>
+                                <span class="badge {% if loan.estado == 'ACTIVO' %}badge-success{% else %}badge-danger{% endif %}">
+                                    {% if loan.estado == 'ACTIVO' %}Pagado{% else %}Desactivado{% endif %}
+                                </span>
+                            </td>
+                            <td>RD$ {{ loan.total_pagado|floatformat:2 }}</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <button class="btn {% if loan.estado == 'ACTIVO' %}btn-warning{% else %}btn-success{% endif %} btn-sm" 
+                                            onclick="toggleLoanStatus({{ loan.id }})">
+                                        <i class="fas {% if loan.estado == 'ACTIVO' %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                        {% if loan.estado == 'ACTIVO' %}Desactivar{% else %}Activar{% endif %}
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteLoan({{ loan.id }})">
+                                        <i class="fas fa-trash-alt"></i>
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="display: none;">
+                            <td colspan="8">
+                                <div class="loan-details" id="details-{{ loan.id }}">
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <div class="detail-label">Número de Préstamo</div>
+                                            <div class="detail-value">{{ loan.numero_factura }}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Interés Aplicado</div>
+                                            <div class="detail-value">RD$ {{ loan.interest|floatformat:2 }}</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Días de Préstamo</div>
+                                            <div class="detail-value">{{ loan.days.days }} días</div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Número de Pagos</div>
+                                            <div class="detail-value">{{ loan.pagos.count }} pagos</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="receipts-section">
+                                        <h4 class="receipts-title">
+                                            <i class="fas fa-receipt"></i> Recibos de Pago ({{ loan.pagos.count }})
+                                        </h4>
+                                        <div class="receipts-grid">
+                                            {% if loan.pagos.all %}
+                                                {% for pago in loan.pagos.all %}
+                                                <div class="receipt-card">
+                                                    <div class="receipt-number">
+                                                        <strong>{{ pago.no_recibo }}</strong>
+                                                        <span class="badge {% if pago.tipo_pago == 'COMPLETO' %}badge-success{% else %}badge-warning{% endif %}">
+                                                            {{ pago.get_tipo_pago_display }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="receipt-amount">RD$ {{ pago.monto_pago|floatformat:2 }}</div>
+                                                    <div class="receipt-date">{{ pago.fecha_pago|date:"d/m/Y" }}</div>
+                                                    <div class="receipt-method">
+                                                        <small>Método: {{ pago.get_metodo_pago_display }}</small>
+                                                    </div>
+                                                    {% if pago.notas %}
+                                                    <div class="receipt-notes">
+                                                        <small><strong>Notas:</strong> {{ pago.notas }}</small>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="no-receipts">
+                                                    <i class="fas fa-info-circle"></i> No hay recibos registrados para este préstamo
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
             <!-- Paginación -->
             <div class="pagination" id="pagination">
+                {% if loans.has_previous %}
                 <div class="page-item">
-                    <a href="#" class="page-link" id="prevPage">
+                    <a href="?page={{ loans.previous_page_number }}" class="page-link" id="prevPage">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 </div>
+                {% endif %}
+                
+                {% for num in loans.paginator.page_range %}
                 <div class="page-item">
-                    <a href="#" class="page-link active">1</a>
+                    <a href="?page={{ num }}" class="page-link {% if num == loans.number %}active{% endif %}">{{ num }}</a>
                 </div>
+                {% endfor %}
+                
+                {% if loans.has_next %}
                 <div class="page-item">
-                    <a href="#" class="page-link">2</a>
-                </div>
-                <div class="page-item">
-                    <a href="#" class="page-link">3</a>
-                </div>
-                <div class="page-item">
-                    <a href="#" class="page-link" id="nextPage">
+                    <a href="?page={{ loans.next_page_number }}" class="page-link" id="nextPage">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </div>
+                {% endif %}
             </div>
         </div>
     </main>
@@ -933,6 +1057,9 @@
         </div>
     </div>
 
+    <!-- CSRF Token para AJAX -->
+    <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Control del menú móvil
@@ -950,179 +1077,13 @@
             mobileMenuBtn.addEventListener('click', toggleMenu);
             overlay.addEventListener('click', toggleMenu);
 
-            // Datos de ejemplo de préstamos pagados
-            const paidLoans = [
-                {
-                    id: 1,
-                    client: "Juan Pérez López",
-                    amount: 25000.00,
-                    startDate: "27/05/2025",
-                    paidDate: "15/08/2025",
-                    status: "pagado",
-                    totalPaid: 27500.00,
-                    active: true,
-                    receipts: [
-                        { number: "REC-001", amount: 5000.00, date: "15/06/2025" },
-                        { number: "REC-002", amount: 5000.00, date: "15/07/2025" },
-                        { number: "REC-003", amount: 17500.00, date: "15/08/2025" }
-                    ]
-                },
-                {
-                    id: 2,
-                    client: "María Rodríguez García",
-                    amount: 15000.00,
-                    startDate: "14/05/2025",
-                    paidDate: "20/07/2025",
-                    status: "pagado",
-                    totalPaid: 16500.00,
-                    active: true,
-                    receipts: [
-                        { number: "REC-004", amount: 8000.00, date: "14/06/2025" },
-                        { number: "REC-005", amount: 8500.00, date: "20/07/2025" }
-                    ]
-                },
-                {
-                    id: 3,
-                    client: "Carlos Mendoza Silva",
-                    amount: 30000.00,
-                    startDate: "10/04/2025",
-                    paidDate: "10/09/2025",
-                    status: "desactivado",
-                    totalPaid: 33000.00,
-                    active: false,
-                    receipts: [
-                        { number: "REC-006", amount: 10000.00, date: "10/05/2025" },
-                        { number: "REC-007", amount: 10000.00, date: "10/06/2025" },
-                        { number: "REC-008", amount: 13000.00, date: "10/09/2025" }
-                    ]
-                },
-                {
-                    id: 4,
-                    client: "Ana Lucía Fernández",
-                    amount: 20000.00,
-                    startDate: "01/06/2025",
-                    paidDate: "25/08/2025",
-                    status: "pagado",
-                    totalPaid: 22000.00,
-                    active: true,
-                    receipts: [
-                        { number: "REC-009", amount: 7000.00, date: "01/07/2025" },
-                        { number: "REC-010", amount: 7000.00, date: "01/08/2025" },
-                        { number: "REC-011", amount: 8000.00, date: "25/08/2025" }
-                    ]
-                }
-            ];
-
-            // Variables para el modal
-            let currentAction = null;
-            let currentLoanId = null;
-
-            // Renderizar tabla de préstamos
-            function renderLoansTable() {
-                const tbody = document.getElementById('loansTableBody');
-                tbody.innerHTML = '';
-
-                paidLoans.forEach(loan => {
-                    // Crear fila principal
-                    const row = document.createElement('tr');
-                    if (!loan.active) {
-                        row.classList.add('disabled');
-                    }
-
-                    row.innerHTML = `
-                        <td>
-                            <span class="expand-icon" data-id="${loan.id}">
-                                <i class="fas fa-chevron-right"></i>
-                            </span>
-                        </td>
-                        <td>${loan.client}</td>
-                        <td>RD$ ${loan.amount.toLocaleString('es-DO', {minimumFractionDigits: 2})}</td>
-                        <td>${loan.startDate}</td>
-                        <td>${loan.paidDate}</td>
-                        <td>
-                            <span class="badge ${loan.active ? 'badge-success' : 'badge-danger'}">
-                                ${loan.active ? 'Pagado' : 'Desactivado'}
-                            </span>
-                        </td>
-                        <td>RD$ ${loan.totalPaid.toLocaleString('es-DO', {minimumFractionDigits: 2})}</td>
-                        <td>
-                            <div class="actions-cell">
-                                <button class="btn ${loan.active ? 'btn-warning' : 'btn-success'} btn-sm" 
-                                        onclick="toggleLoanStatus(${loan.id})">
-                                    <i class="fas ${loan.active ? 'fa-ban' : 'fa-check'}"></i>
-                                    ${loan.active ? 'Desactivar' : 'Activar'}
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteLoan(${loan.id})">
-                                    <i class="fas fa-trash-alt"></i>
-                                    Eliminar
-                                </button>
-                            </div>
-                        </td>
-                    `;
-
-                    tbody.appendChild(row);
-
-                    // Crear fila de detalles
-                    const detailsRow = document.createElement('tr');
-                    detailsRow.style.display = 'none';
-                    
-                    // Calcular días entre fechas
-                    const startDate = new Date(loan.startDate.split('/').reverse().join('-'));
-                    const endDate = new Date(loan.paidDate.split('/').reverse().join('-'));
-                    const diffTime = Math.abs(endDate - startDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    detailsRow.innerHTML = `
-                        <td colspan="8">
-                            <div class="loan-details" id="details-${loan.id}">
-                                <div class="details-grid">
-                                    <div class="detail-item">
-                                        <div class="detail-label">Número de Préstamo</div>
-                                        <div class="detail-value">PREST-${loan.id.toString().padStart(3, '0')}</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Interés Aplicado</div>
-                                        <div class="detail-value">RD$ ${(loan.totalPaid - loan.amount).toLocaleString('es-DO', {minimumFractionDigits: 2})}</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Días de Préstamo</div>
-                                        <div class="detail-value">${diffDays} días</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Número de Pagos</div>
-                                        <div class="detail-value">${loan.receipts.length} pagos</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="receipts-section">
-                                    <h4 class="receipts-title">
-                                        <i class="fas fa-receipt"></i> Recibos de Pago
-                                    </h4>
-                                    <div class="receipts-grid">
-                                        ${loan.receipts.map(receipt => `
-                                            <div class="receipt-card">
-                                                <div class="receipt-number">${receipt.number}</div>
-                                                <div class="receipt-amount">RD$ ${receipt.amount.toLocaleString('es-DO', {minimumFractionDigits: 2})}</div>
-                                                <div class="receipt-date">${receipt.date}</div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    `;
-
-                    tbody.appendChild(detailsRow);
+            // Agregar eventos a los iconos de expansión
+            document.querySelectorAll('.expand-icon').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const loanId = this.getAttribute('data-id');
+                    toggleDetails(loanId, this);
                 });
-
-                // Agregar eventos a los iconos de expansión
-                document.querySelectorAll('.expand-icon').forEach(icon => {
-                    icon.addEventListener('click', function() {
-                        const loanId = this.getAttribute('data-id');
-                        toggleDetails(loanId, this);
-                    });
-                });
-            }
+            });
 
             // Función para expandir/contraer detalles
             function toggleDetails(loanId, icon) {
@@ -1181,7 +1142,7 @@
                 rows.forEach(row => {
                     const client = row.cells[1].textContent.toLowerCase();
                     const loanId = row.querySelector('.expand-icon').getAttribute('data-id');
-                    const loanNumber = `prest-${loanId.padStart(3, '0')}`;
+                    const loanNumber = row.querySelector('.detail-value') ? row.querySelector('.detail-value').textContent.toLowerCase() : '';
                     
                     if (client.includes(searchTerm) || loanNumber.includes(searchTerm)) {
                         row.style.display = '';
@@ -1202,19 +1163,25 @@
                 });
             }
 
+            // Variables para el modal
+            let currentAction = null;
+            let currentLoanId = null;
+
             // Función para activar/desactivar préstamo
             window.toggleLoanStatus = function(loanId) {
-                const loan = paidLoans.find(l => l.id === loanId);
+                const loanRow = document.querySelector(`.expand-icon[data-id="${loanId}"]`).closest('tr');
+                const isActive = loanRow.querySelector('.badge').classList.contains('badge-success');
+                
                 currentAction = 'toggle';
                 currentLoanId = loanId;
                 
-                document.getElementById('modalIcon').className = loan.active ? 'fas fa-ban' : 'fas fa-check-circle';
-                document.getElementById('modalTitle').textContent = loan.active ? 'Desactivar Préstamo' : 'Activar Préstamo';
-                document.getElementById('modalMessage').textContent = loan.active ? 
+                document.getElementById('modalIcon').className = isActive ? 'fas fa-ban' : 'fas fa-check-circle';
+                document.getElementById('modalTitle').textContent = isActive ? 'Desactivar Préstamo' : 'Activar Préstamo';
+                document.getElementById('modalMessage').textContent = isActive ? 
                     '¿Está seguro de desactivar este préstamo? Esta acción puede ser útil si se registró un pago por error.' : 
                     '¿Está seguro de activar este préstamo? Esto lo volverá a mostrar como pagado en el sistema.';
-                document.getElementById('confirmBtn').textContent = loan.active ? 'Desactivar' : 'Activar';
-                document.getElementById('confirmBtn').className = `btn ${loan.active ? 'btn-warning' : 'btn-success'}`;
+                document.getElementById('confirmBtn').textContent = isActive ? 'Desactivar' : 'Activar';
+                document.getElementById('confirmBtn').className = `btn ${isActive ? 'btn-warning' : 'btn-success'}`;
                 
                 showModal();
             };
@@ -1255,20 +1222,56 @@
 
             // Botón de confirmar en modal
             document.getElementById('confirmBtn').addEventListener('click', function() {
+                const csrfToken = document.getElementById('csrfToken').value;
+                
                 if (currentAction === 'toggle') {
-                    const loanIndex = paidLoans.findIndex(l => l.id === currentLoanId);
-                    if (loanIndex !== -1) {
-                        paidLoans[loanIndex].active = !paidLoans[loanIndex].active;
-                        paidLoans[loanIndex].status = paidLoans[loanIndex].active ? 'pagado' : 'desactivado';
-                    }
+                    // Enviar solicitud AJAX para cambiar el estado
+                    fetch(`/prestamos/toggle-status/${currentLoanId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Recargar la página para ver los cambios
+                            window.location.reload();
+                        } else {
+                            alert('Error al actualizar el estado del préstamo');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al actualizar el estado del préstamo');
+                    });
+                    
                 } else if (currentAction === 'delete') {
-                    const loanIndex = paidLoans.findIndex(l => l.id === currentLoanId);
-                    if (loanIndex !== -1) {
-                        paidLoans.splice(loanIndex, 1);
-                    }
+                    // Enviar solicitud AJAX para eliminar
+                    fetch(`/prestamos/delete/${currentLoanId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Recargar la página para ver los cambios
+                            window.location.reload();
+                        } else {
+                            alert('Error al eliminar el préstamo');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar el préstamo');
+                    });
                 }
                 
-                renderLoansTable();
                 closeModal();
             });
 
@@ -1285,9 +1288,6 @@
                     document.body.style.overflow = 'auto';
                 }
             });
-
-            // Inicializar la tabla
-            renderLoansTable();
         });
     </script>
 </body>

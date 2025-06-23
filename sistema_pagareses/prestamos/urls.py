@@ -26,8 +26,9 @@ urlpatterns = [
     path('clientes/registrar_pago/', views.registrar_pago, name='registrar_pago'),
     path('clientes/<int:cliente_id>/prestamos/', views.obtener_prestamos_cliente, name='obtener_prestamos_cliente'),
     path('buscar-facturas/', views.buscar_facturas, name='buscar_facturas'),
-   
-    
+    path('imprimir-pagare/<str:numero_factura>/', views.imprimir_pagare, name='imprimir_pagare'),
+    path('prestamos/toggle-status/<int:loan_id>/', views.toggle_loan_status, name='toggle_loan_status'),
+    path('prestamos/delete/<int:loan_id>/', views.delete_loan, name='delete_loan'),
 ]
 
 

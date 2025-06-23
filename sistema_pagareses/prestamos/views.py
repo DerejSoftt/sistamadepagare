@@ -24,10 +24,15 @@ from django.db import IntegrityError
 import time
 import uuid
 from django.contrib import messages
+from django.conf import settings
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
 
 
+from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator
 
-
+from django.db.models import DurationField
 
 
 
@@ -338,9 +343,68 @@ def obtener_prestamos_cliente(request, cliente_id):
 
 
 
-
 def reimprimir(request):
-    return render(request, "prestamos/reimprimir.html")
+    # Obtener el último préstamo registrado
+    ultimo_prestamo = Prestamo.objects.order_by('-fecha_registro').first()
+    
+    # Obtener todos los préstamos para la búsqueda
+    prestamos = Prestamo.objects.all().order_by('-fecha_registro')
+    
+    # Datos de la empresa (deberías configurarlos en settings.py o en un modelo)
+    empresa = {
+        'nombre': getattr(settings, 'EMPRESA_NOMBRE', 'Mi Empresa'),
+        'direccion': getattr(settings, 'EMPRESA_DIRECCION', 'Calle Principal #123'),
+        'rnc': getattr(settings, 'EMPRESA_RNC', '123456789'),
+        'telefono': getattr(settings, 'EMPRESA_TELEFONO', '809-555-5555'),
+    }
+    
+    context = {
+        'ultimo_prestamo': ultimo_prestamo,
+        'prestamos': prestamos,
+        'empresa': empresa,
+    }
+    return render(request, "prestamos/reimprimir.html", context)
+
+
+
+def imprimir_pagare(request, numero_factura):
+    prestamo = get_object_or_404(Prestamo, numero_factura=numero_factura)
+    
+    # Datos de la empresa (configurar en settings.py)
+    empresa = {
+        'nombre': getattr(settings, 'EMPRESA_NOMBRE', 'AGRO-JIMENEZ CRUZ, SRL'),
+        'direccion': getattr(settings, 'EMPRESA_DIRECCION', 'Calle Principal #123, CASTAÑUELAS, RD'),
+        'rnc': getattr(settings, 'EMPRESA_RNC', '123-456789-11'),
+        'telefono': getattr(settings, 'EMPRESA_TELEFONO', '808-555-5555'),
+    }
+    
+    # Convertir monto a letras
+    try:
+        monto_letras = num2words(float(prestamo.monto), lang='es').upper() + " PESOS DOMINICANOS CON 00/100"
+    except:
+        monto_letras = ""
+
+    context = {
+        'empresa': empresa,
+        'prestamo': {
+            'numero_factura': prestamo.numero_factura,
+            'fecha': prestamo.fecha_despacho.strftime('%d/%m/%Y'),
+            'fecha_vencimiento': prestamo.fecha_vencimiento.strftime('%d/%m/%Y'),
+            'monto': "{:,.2f}".format(float(prestamo.monto)),
+            'monto_letras': monto_letras,
+            'departamento': prestamo.get_departamento_display(),
+            'observaciones': prestamo.observaciones or '',
+        },
+        'cliente': {
+            'nombre_completo': f"{prestamo.cliente.nombres} {prestamo.cliente.apellidos or ''}",
+            'documento': prestamo.cliente.numero_identificacion,
+            'direccion': prestamo.cliente.direccion,
+        }
+    }
+
+    return render(request, 'prestamos/facturas.html', context)
+
+
 
 def registrodepago(request):
     # Obtener todos los préstamos con sus pagos relacionados
@@ -371,8 +435,51 @@ def registrodepago(request):
     }
     return render(request, "prestamos/registrodepago.html", context)
 
+
+
+
+
 def prestamospagados(request):
-    return render(request, "prestamos/prestamospagados.html")
+    # Obtener todos los préstamos con estado "PAGADO"
+    prestamos = Prestamo.objects.filter(estado='PAGADO').select_related('cliente').prefetch_related('pagos').order_by('-fecha_registro')
+    
+    # Anotar cada préstamo con el total pagado (suma de todos sus recibos)
+    prestamos = prestamos.annotate(
+        total_pagado=Coalesce(Sum('pagos__monto_pago'), Decimal('0.00')),
+        days=ExpressionWrapper(
+            F('fecha_vencimiento') - F('fecha_despacho'),
+            output_field=DurationField()
+        )
+    ).annotate(
+        interest=F('total_pagado') - F('monto')
+    )
+    
+    # Paginación
+    paginator = Paginator(prestamos, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'loans': page_obj,
+    }
+    return render(request, "prestamos/prestamospagados.html", context)
+
+@require_http_methods(["POST"])
+def toggle_loan_status(request, loan_id):
+    prestamo = get_object_or_404(Prestamo, id=loan_id)
+    if prestamo.estado == 'ACTIVO':
+        prestamo.estado = 'INACTIVO'
+    else:
+        prestamo.estado = 'ACTIVO'
+    prestamo.save()
+    return JsonResponse({'success': True})
+
+@require_http_methods(["DELETE"])
+def delete_loan(request, loan_id):
+    prestamo = get_object_or_404(Prestamo, id=loan_id)
+    prestamo.delete()
+    return JsonResponse({'success': True})
+
 
 def despacho(request):
     return render(request, "prestamos/despacho.html")
