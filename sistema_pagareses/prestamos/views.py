@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Cliente,  Prestamo, Ingreso
+from .models import Cliente,  Prestamo, Ingreso, RecibosAnulados
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 from decimal import Decimal,  InvalidOperation
@@ -34,7 +34,11 @@ from django.core.paginator import Paginator
 
 from django.db.models import DurationField
 
+from django.contrib.auth import authenticate, login as auth_login
 
+from django.contrib.auth.models import User
+from django.http import JsonResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
 def formulario(request):
     if request.method == 'POST':
@@ -116,8 +120,8 @@ def formulario(request):
     return render(request, "prestamos/formulario.html")
 
 
-def index(request):
-    return render(request, "prestamos/index.html")
+def reporte(request):
+    return render(request, "prestamos/reporte.html")
 
 
 
@@ -879,7 +883,277 @@ def factura_prestamo(request, prestamo_id):
         print(error_msg)
         return HttpResponse(error_msg, status=500)
 
+@require_http_methods(["GET", "POST"])
+def index(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None and user.is_superuser:
+            auth_login(request, user)
+            return redirect('reporte')  # Redirige al dashboard después del login
+            
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'error': 'Credenciales inválidas o no tiene permisos de superusuario'
+            }, status=400)
+        
+        return render(request, "prestamos/index.html", {
+            'form': {'errors': True}
+        })
+    
+    return render(request, "prestamos/index.html")
 
-def login(request):
-    return render(request, "prestamos/login.html")
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def search_receipts(request):
+    try:
+        query = request.GET.get('q', '').strip()
+        
+        if not query or len(query) < 3:
+            return JsonResponse({
+                'error': 'Ingrese al menos 3 caracteres para buscar'
+            }, status=400)
+        
+        print(f"Buscando recibos con query: {query}")
+        
+        # Buscar recibos no anulados
+        receipts = Ingreso.objects.filter(
+            anulado=False,
+            no_recibo__icontains=query
+        ).select_related('prestamo__cliente')[:10]
+        
+        results = []
+        for receipt in receipts:
+            try:
+                cliente = receipt.prestamo.cliente if receipt.prestamo else None
+                
+                # Debug: Imprimir el monto para verificar
+                print(f"Recibo {receipt.no_recibo}: monto_pago = {receipt.monto_pago} (tipo: {type(receipt.monto_pago)})")
+                
+                # Convertir monto a float de forma segura
+                if receipt.monto_pago is not None:
+                    if isinstance(receipt.monto_pago, Decimal):
+                        monto = float(receipt.monto_pago)
+                    else:
+                        monto = float(receipt.monto_pago)
+                else:
+                    monto = 0.00
+                
+                result_item = {
+                    'id': receipt.id,
+                    'no_recibo': receipt.no_recibo,
+                    'monto_pago': round(monto, 2),  # Redondear a 2 decimales
+                    'fecha_pago': receipt.fecha_pago.strftime('%Y-%m-%d'),
+                    'client_name': f"{cliente.nombres} {cliente.apellidos}" if cliente else 'Cliente no disponible',
+                    'client_id': cliente.numero_identificacion if cliente else 'N/A',
+                    'client_address': cliente.direccion if cliente else 'Dirección no disponible',
+                }
+                
+                # Debug: Imprimir el resultado
+                print(f"Resultado procesado: {result_item}")
+                
+                results.append(result_item)
+                
+            except AttributeError as e:
+                print(f"Error de atributo procesando recibo {receipt.id}: {str(e)}")
+                # Intentar acceso directo a los campos
+                try:
+                    result_item = {
+                        'id': receipt.id,
+                        'no_recibo': receipt.no_recibo,
+                        'monto_pago': float(receipt.monto_pago) if receipt.monto_pago else 0.00,
+                        'fecha_pago': receipt.fecha_pago.strftime('%Y-%m-%d'),
+                        'client_name': 'Cliente no disponible',
+                        'client_id': 'N/A',
+                        'client_address': 'Dirección no disponible',
+                    }
+                    results.append(result_item)
+                except Exception as inner_e:
+                    print(f"Error interno procesando recibo {receipt.id}: {str(inner_e)}")
+                    continue
+            except Exception as e:
+                print(f"Error general procesando recibo {receipt.id}: {str(e)}")
+                continue
+        
+        print(f"Total de resultados encontrados: {len(results)}")
+        
+        return JsonResponse({
+            'results': results,
+            'total': len(results)
+        })
+    
+    except Exception as e:
+        print(f"Error crítico en search_receipts: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'error': f'Error interno del servidor: {str(e)}'
+        }, status=500)
+
+
+# Vista adicional para depuración - puedes usarla temporalmente
+@csrf_exempt 
+@require_http_methods(["GET"])
+def debug_receipts(request):
+    """Vista para depurar los datos de recibos"""
+    try:
+        # Obtener algunos recibos para verificar la estructura
+        receipts = Ingreso.objects.all()[:5]
+        
+        debug_info = []
+        for receipt in receipts:
+            info = {
+                'id': receipt.id,
+                'no_recibo': receipt.no_recibo,
+                'monto_pago': str(receipt.monto_pago),
+                'monto_pago_type': str(type(receipt.monto_pago)),
+                'fecha_pago': str(receipt.fecha_pago),
+                'anulado': receipt.anulado,
+                'has_prestamo': hasattr(receipt, 'prestamo') and receipt.prestamo is not None,
+            }
+            
+            if hasattr(receipt, 'prestamo') and receipt.prestamo:
+                info['has_cliente'] = hasattr(receipt.prestamo, 'cliente') and receipt.prestamo.cliente is not None
+                if hasattr(receipt.prestamo, 'cliente') and receipt.prestamo.cliente:
+                    cliente = receipt.prestamo.cliente
+                    info['cliente_nombres'] = getattr(cliente, 'nombres', 'N/A')
+                    info['cliente_apellidos'] = getattr(cliente, 'apellidos', 'N/A')
+            
+            debug_info.append(info)
+        
+        return JsonResponse({
+            'debug_info': debug_info,
+            'total_receipts': Ingreso.objects.count()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'traceback': str(traceback.format_exc())
+        })
+
+
+
+
+#ojo pendiente probar antes de borrar
+@csrf_exempt
+@require_http_methods(["POST"])
+def cancel_receipt(request):
+    try:
+        data = request.POST
+        receipt_id = data.get('receipt_id')
+        reason = data.get('reason')
+        notes = data.get('notes')
+        cancellation_date = data.get('cancellation_date')
+        
+        if not all([receipt_id, reason, notes, cancellation_date]):
+            return JsonResponse({'error': 'Faltan datos requeridos'}, status=400)
+        
+        receipt = Ingreso.objects.get(no_recibo=receipt_id, anulado=False)
+        receipt.anulado = True
+        receipt.motivo_anulacion = reason
+        receipt.notas_anulacion = notes
+        receipt.fecha_anulacion = cancellation_date
+        receipt.save()
+        
+        return JsonResponse({'success': True, 'message': 'Recibo anulado exitosamente'})
+            
+    except Ingreso.DoesNotExist:
+        return JsonResponse({'error': 'Recibo no encontrado o ya anulado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
+
+
+
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@login_required
+def anular_recibo(request):
+    try:
+        # Manejar diferentes tipos de contenido (FormData y JSON)
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+
+        # Validar datos requeridos
+        required_fields = ['no_recibo', 'motivo', 'notas', 'fecha_anulacion']
+        if not all(field in data for field in required_fields):
+            return JsonResponse({
+                'success': False,
+                'error': 'Faltan campos requeridos: no_recibo, motivo, notas, fecha_anulacion'
+            }, status=400)
+
+        no_recibo = data['no_recibo']
+        motivo = data['motivo']
+        notas = data['notas']
+        fecha_anulacion = data['fecha_anulacion']
+
+        # Validar formato de fecha
+        try:
+            fecha_anulacion = datetime.strptime(fecha_anulacion, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse({
+                'success': False,
+                'error': 'Formato de fecha inválido. Use YYYY-MM-DD'
+            }, status=400)
+
+        # Usar transacción atómica para asegurar integridad
+        with transaction.atomic():
+            # Buscar el recibo (solo no anulados)
+            recibo = Ingreso.objects.select_for_update().get(
+                no_recibo=no_recibo,
+                anulado=False
+            )
+
+            # Crear copia en RecibosAnulados
+            recibo_anulado = RecibosAnulados(
+                no_recibo=recibo.no_recibo,
+                prestamo=recibo.prestamo,
+                monto_pago=recibo.monto_pago,
+                fecha_pago=recibo.fecha_pago,
+                metodo_pago=recibo.metodo_pago,
+                tipo_pago=recibo.tipo_pago,
+                notas=recibo.notas,
+                fecha_registro=recibo.fecha_registro,
+                motivo_anulacion=motivo,
+                notas_anulacion=notas,
+                fecha_anulacion=fecha_anulacion,
+                anulado_por=request.user
+            )
+            recibo_anulado.save()
+
+            # Eliminar el recibo original
+            recibo.delete()
+
+            # Respuesta exitosa con más detalles
+            return JsonResponse({
+                'success': True,
+                'message': 'Recibo anulado exitosamente',
+                'data': {
+                    'id_anulado': recibo_anulado.id,
+                    'numero_recibo': recibo_anulado.no_recibo,
+                    'monto': float(recibo_anulado.monto_pago),
+                    'fecha_anulacion': recibo_anulado.fecha_anulacion.strftime('%Y-%m-%d'),
+                    'motivo': recibo_anulado.motivo_anulacion,
+                    'anulado_por': request.user.username
+                }
+            })
+
+    except Ingreso.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Recibo no encontrado o ya está anulado'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al procesar la anulación: {str(e)}'
+        }, status=500)

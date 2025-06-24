@@ -498,88 +498,67 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="formulario.html" class="nav-link">
+                    <a href="{% url 'formulario' %}" class="nav-link">
                         <i class="fas fa-user-plus"></i>
                         <span>Registrar Cliente</span>
                     </a>
                 </li>
                
+                <li class="nav-item">
+                    <a href="{% url 'clientes' %}" class="nav-link" data-view="list-view">
+                        <i class="fas fa-users"></i>
+                        <span>Perfil del Cliente</span>
+                    </a>
+                </li>
 
-                 <li class="nav-item">
-                <a href="clientes.html" class="nav-link " data-view="list-view">
-                    <i class="fas fa-users"></i>
-                    <span>Perfil del Cliente</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="despacho.html" class="nav-link">
-                    <i class="fas fa-history"></i>
-                    <span>Despacho</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="registrodepago.html" class="nav-link">
-                    <i class="fas fa-hand-holding-usd"></i>
-                    <span>Préstamos y Abonos</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="prestamospagados.html" class="nav-link">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Préstamos Pagados</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="anulacion.html" class="nav-link">
-                    <i class="fas fa-times-circle"></i>
-                    <span>Anulaciones de facturas</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="anulacionderesivo.html" class="nav-link active">
-                    <i class="fas fa-ban"></i>
-                    <span>Anulaciones de recibos</span>
-                </a>
-            </li>
-
-             <li class="nav-item">
-                <a href="reimprimir.html" class="nav-link">
-                    <i class="fas fa-print"></i>
-                    <span>rimprimir factura </span>
-                </a>
-            </li>
-
-            
-            <li class="nav-item">
-                <a href="re.html" class="nav-link">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>reportes</span>
-                </a>
-            </li>
-
-
-                <!-- <li class="nav-item">
-                    <a href="#" class="nav-link">
+                <li class="nav-item">
+                    <a href="{% url 'despacho' %}" class="nav-link">
                         <i class="fas fa-history"></i>
-                        <span>Pagos</span>
+                        <span>Despacho</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'registrodepago' %}" class="nav-link">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Préstamos y Abonos</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'prestamospagados' %}" class="nav-link">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Préstamos Pagados</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'anulacion' %}" class="nav-link">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Anulaciones de facturas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'anulacionderesivo' %}" class="nav-link active">
+                        <i class="fas fa-ban"></i>
+                        <span>Anulaciones de recibos</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'reimprimir' %}" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>Reimprimir factura</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'reporte' %}" class="nav-link">
                         <i class="fas fa-chart-bar"></i>
                         <span>Reportes</span>
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>Configuración</span>
-                    </a>
-                </li>  -->
-                <li class="nav-item">
-                    <a href="login.html" class="nav-link">
+                    <a href="{% url 'index' %}" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Cerrar Sesión</span>
                     </a>
@@ -601,7 +580,7 @@
         <!-- Barra de búsqueda -->
         <div class="search-container">
             <div class="search-input-container">
-                <input type="text" class="search-input" id="clientSearch" placeholder="Buscar por nombre, documento o ID de factura..." autocomplete="off">
+                <input type="text" class="search-input" id="clientSearch" placeholder="Buscar por nombre, documento o número de recibo..." autocomplete="off">
                 <button class="search-btn" id="searchBtn">
                     <i class="fas fa-search"></i>
                     <span class="search-btn-text">Buscar</span>
@@ -618,7 +597,7 @@
             
             <form class="cancellation-form" id="cancellationForm">
                 <div class="form-group">
-                    <label for="invoiceId" class="required">ID de Factura</label>
+                    <label for="invoiceId" class="required">Número de Recibo</label>
                     <input type="text" id="invoiceId" class="form-control" required>
                 </div>
                 
@@ -644,7 +623,7 @@
                 
                 <div class="form-group">
                     <label for="originalAmount">Monto Original (RD$)</label>
-                    <input type="number" id="originalAmount" class="form-control" readonly>
+                    <input type="number" id="originalAmount" class="form-control" readonly step="0.01">
                 </div>
                 
                 <div class="form-group">
@@ -657,7 +636,7 @@
                     <select id="reason" class="form-control" required>
                         <option value="">Seleccione motivo...</option>
                         <option value="error">Error en el monto</option>
-                        <option value="duplicate">Factura duplicada</option>
+                        <option value="duplicate">Recibo duplicado</option>
                         <option value="client_request">Solicitud del cliente</option>
                         <option value="system_error">Error del sistema</option>
                         <option value="other">Otro</option>
@@ -679,246 +658,363 @@
                 </button>
             </div>
         </div>
-
-        <!-- Sección de resultados -->
-        <!-- <div class="results-section animate-fade">
-            <h3 class="results-title"><i class="fas fa-history"></i> Últimas Anulaciones Registradas</h3>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Anulaciones Hoy</div>
-                    <div class="stat-value">3</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-label">Monto Anulado</div>
-                    <div class="stat-value">RD$ 8,750.00</div>
-                </div>
-                <div class="stat-card secondary">
-                    <div class="stat-label">Promedio por Anulación</div>
-                    <div class="stat-value">RD$ 2,916.67</div>
-                </div>
-            </div>
-            
-            <div class="form-actions">
-                <button class="btn btn-outline">
-                    <i class="fas fa-file-export"></i> Exportar Reporte
-                </button>
-            </div>
-        </div> -->
     </main>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del DOM
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const clientSearch = document.getElementById('clientSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchResults = document.getElementById('searchResults');
+    const invoiceId = document.getElementById('invoiceId');
+    const clientName = document.getElementById('clientName');
+    const clientId = document.getElementById('clientId');
+    const clientAddress = document.getElementById('clientAddress');
+    const clientDepartment = document.getElementById('clientDepartment');
+    const originalAmount = document.getElementById('originalAmount');
+    const cancellationDate = document.getElementById('cancellationDate');
+    const reason = document.getElementById('reason');
+    const cancellationNotes = document.getElementById('cancellationNotes');
+    const cancellationForm = document.getElementById('cancellationForm');
+    const resetBtn = document.getElementById('resetBtn');
+    const submitBtn = document.getElementById('submitBtn');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Control del menú móvil
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+    // Configuración inicial
+    const today = new Date();
+    cancellationDate.value = today.toISOString().split('T')[0];
 
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
-                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    // Funciones auxiliares
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
+        }
+        return cookieValue;
+    }
 
-            mobileMenuBtn.addEventListener('click', toggleMenu);
-            overlay.addEventListener('click', toggleMenu);
+    function showLoading(state) {
+        if (state) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Anular Transacción';
+        }
+    }
 
-            // Datos de ejemplo para transacciones
-            const transactions = [
-                { 
-                    id: 'INV-1001', 
-                    clientId: '402-1231432-5', 
-                    clientName: "Juan Pérez López", 
-                    address: "Calle Principal 123, Ciudad", 
-                    department: "Santo Domingo",
-                    amount: 5000,
-                    date: '2024-05-15'
-                },
-                { 
-                    id: 'INV-1002', 
-                    clientId: '402-9876543-1', 
-                    clientName: "María Rodríguez García", 
-                    address: "Avenida Libertad 456", 
-                    department: "Distrito Nacional",
-                    amount: 3750,
-                    date: '2024-05-14'
-                },
-                { 
-                    id: 'INV-1003', 
-                    clientId: '402-4567890-2', 
-                    clientName: "Carlos Martínez Fernández", 
-                    address: "Calle Las Flores 789", 
-                    department: "Santiago",
-                    amount: 6250,
-                    date: '2024-05-13'
-                }
-            ];
+    function showAlert(message, type = 'success') {
+        // Eliminar alertas anteriores
+        const existingAlert = document.querySelector('.custom-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
 
-            // Elementos del DOM
-            const clientSearch = document.getElementById('clientSearch');
-            const searchBtn = document.getElementById('searchBtn');
-            const searchResults = document.getElementById('searchResults');
-            const invoiceId = document.getElementById('invoiceId');
-            const clientName = document.getElementById('clientName');
-            const clientId = document.getElementById('clientId');
-            const clientAddress = document.getElementById('clientAddress');
-            const clientDepartment = document.getElementById('clientDepartment');
-            const originalAmount = document.getElementById('originalAmount');
-            const cancellationDate = document.getElementById('cancellationDate');
-            const reason = document.getElementById('reason');
-            const cancellationNotes = document.getElementById('cancellationNotes');
-            const cancellationForm = document.getElementById('cancellationForm');
-            const resetBtn = document.getElementById('resetBtn');
-            const submitBtn = document.getElementById('submitBtn');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `custom-alert alert-${type}`;
+        alertDiv.innerHTML = `
+            <span>${message}</span>
+            <button class="close-alert">&times;</button>
+        `;
 
-            // Establecer fecha actual por defecto
-            const today = new Date();
-            cancellationDate.value = today.toISOString().split('T')[0];
+        document.body.appendChild(alertDiv);
 
-            // Función para buscar transacciones
-            function searchTransactions(query) {
-                if (!query) {
-                    searchResults.style.display = 'none';
-                    return;
-                }
+        // Auto-ocultar después de 5 segundos
+        setTimeout(() => {
+            alertDiv.classList.add('fade-out');
+            setTimeout(() => alertDiv.remove(), 500);
+        }, 5000);
 
-                const results = transactions.filter(trans => 
-                    trans.id.toLowerCase().includes(query.toLowerCase()) || 
-                    trans.clientName.toLowerCase().includes(query.toLowerCase()) || 
-                    trans.clientId.includes(query)
-                );
-
-                displayResults(results);
-            }
-
-            // Función para mostrar resultados
-            function displayResults(results) {
-                searchResults.innerHTML = '';
-                
-                if (results.length === 0) {
-                    const noResults = document.createElement('div');
-                    noResults.className = 'search-result-item';
-                    noResults.textContent = 'No se encontraron transacciones';
-                    searchResults.appendChild(noResults);
-                } else {
-                    results.forEach(trans => {
-                        const item = document.createElement('div');
-                        item.className = 'search-result-item';
-                        item.innerHTML = `
-                            <div style="font-weight: 600;">${trans.id} - ${trans.clientName}</div>
-                            <div style="font-size: 0.85rem; color: var(--gray);">${trans.clientId} - RD$ ${trans.amount.toLocaleString()}</div>
-                        `;
-                        
-                        item.addEventListener('click', () => {
-                            selectTransaction(trans);
-                            searchResults.style.display = 'none';
-                            clientSearch.value = '';
-                        });
-                        
-                        searchResults.appendChild(item);
-                    });
-                }
-                
-                searchResults.style.display = results.length > 0 ? 'block' : 'none';
-            }
-
-            // Función para seleccionar transacción
-            function selectTransaction(trans) {
-                invoiceId.value = trans.id;
-                clientName.value = trans.clientName;
-                clientId.value = trans.clientId;
-                clientAddress.value = trans.address;
-                clientDepartment.value = trans.department;
-                originalAmount.value = trans.amount;
-                reason.focus();
-            }
-
-            // Event listeners
-            clientSearch.addEventListener('input', () => {
-                searchTransactions(clientSearch.value);
-            });
-
-            searchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                searchTransactions(clientSearch.value);
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-container')) {
-                    searchResults.style.display = 'none';
-                }
-            });
-
-            // Resetear formulario
-            resetBtn.addEventListener('click', () => {
-                cancellationForm.reset();
-                cancellationDate.value = today.toISOString().split('T')[0];
-                clientSearch.focus();
-            });
-
-            // Enviar formulario
-            cancellationForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!invoiceId.value) {
-                    alert('Por favor busque y seleccione una factura para anular');
-                    return;
-                }
-                
-                if (!reason.value) {
-                    alert('Por favor seleccione un motivo de anulación');
-                    reason.focus();
-                    return;
-                }
-                
-                if (!cancellationNotes.value) {
-                    alert('Por favor ingrese las observaciones de la anulación');
-                    cancellationNotes.focus();
-                    return;
-                }
-                
-                // Simular envío exitoso
-                alert(`Factura ${invoiceId.value} anulada exitosamente. No se registrará en el perfil del cliente.`);
-                cancellationForm.reset();
-                cancellationDate.value = today.toISOString().split('T')[0];
-                clientSearch.focus();
-                
-                // Aquí iría la lógica para enviar los datos al servidor
-                // const formData = new FormData(cancellationForm);
-                // formData.append('action', 'cancel');
-                // fetch('/api/transactions', { method: 'POST', body: formData })
-                //   .then(response => response.json())
-                //   .then(data => console.log(data))
-                //   .catch(error => console.error(error));
-            });
-
-            // Mostrar animaciones
-            document.querySelectorAll('.animate-fade').forEach(el => {
-                el.style.opacity = '1';
-            });
-
-            // Manejar cambios de tamaño de pantalla
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.remove('active');
-                    overlay.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-                
-                // Ajustar texto del botón de búsqueda en móviles
-                const searchBtnText = document.querySelector('.search-btn-text');
-                if (window.innerWidth < 576) {
-                    searchBtnText.style.display = 'none';
-                } else {
-                    searchBtnText.style.display = 'inline';
-                }
-            });
-
-            // Inicializar para responsive
-            if (window.innerWidth < 576) {
-                document.querySelector('.search-btn-text').style.display = 'none';
-            }
+        // Cerrar manualmente
+        alertDiv.querySelector('.close-alert').addEventListener('click', () => {
+            alertDiv.remove();
         });
-    </script>
+    }
+
+    // Funciones principales
+    async function searchTransactions(query) {
+        if (!query || query.length < 3) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/search_receipts?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error en la búsqueda');
+            }
+
+            displayResults(data.results || []);
+        } catch (error) {
+            console.error('Error al buscar:', error);
+            showAlert(`Error al buscar recibos: ${error.message}`, 'error');
+            displayResults([]);
+        }
+    }
+
+    function displayResults(results) {
+        searchResults.innerHTML = '';
+        
+        if (!results || results.length === 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'search-result-item no-results';
+            noResults.textContent = 'No se encontraron recibos activos';
+            searchResults.appendChild(noResults);
+        } else {
+            results.forEach(trans => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <div class="receipt-info">
+                        <strong>${trans.no_recibo}</strong> - ${trans.client_name}
+                    </div>
+                    <div class="receipt-details">
+                        <span>${trans.client_id}</span>
+                        <span class="amount">RD$ ${parseFloat(trans.monto_pago).toFixed(2)}</span>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    selectTransaction(trans);
+                    searchResults.style.display = 'none';
+                    clientSearch.value = '';
+                });
+                
+                searchResults.appendChild(item);
+            });
+        }
+        
+        searchResults.style.display = 'block';
+    }
+
+    function selectTransaction(trans) {
+        invoiceId.value = trans.no_recibo;
+        clientName.value = trans.client_name;
+        clientId.value = trans.client_id;
+        clientAddress.value = trans.client_address || 'No disponible';
+        clientDepartment.value = trans.client_department || 'No disponible';
+        originalAmount.value = parseFloat(trans.monto_pago).toFixed(2);
+        reason.focus();
+    }
+
+    function validateForm() {
+        if (!invoiceId.value) {
+            showAlert('Debe seleccionar un recibo para anular', 'error');
+            return false;
+        }
+        
+        if (!reason.value) {
+            showAlert('Seleccione un motivo de anulación', 'error');
+            reason.focus();
+            return false;
+        }
+        
+        if (!cancellationNotes.value) {
+            showAlert('Ingrese las observaciones de la anulación', 'error');
+            cancellationNotes.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    async function handleCancellation() {
+        if (!validateForm()) return;
+
+        const confirmation = await Swal.fire({
+            title: '¿Confirmar anulación?',
+            text: `Está a punto de anular el recibo ${invoiceId.value}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, anular',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmation.isConfirmed) return;
+
+        try {
+            showLoading(true);
+
+            const formData = new URLSearchParams();
+            formData.append('no_recibo', invoiceId.value);
+            formData.append('motivo', reason.value);
+            formData.append('notas', cancellationNotes.value);
+            formData.append('fecha_anulacion', cancellationDate.value);
+
+            const response = await fetch('anular_recibo/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error en el servidor');
+            }
+
+            if (data.success) {
+                showAlert(`Recibo ${data.data.numero_recibo} anulado exitosamente`);
+                
+                // Resetear formulario
+                cancellationForm.reset();
+                cancellationDate.value = new Date().toISOString().split('T')[0];
+                clientSearch.focus();
+            } else {
+                throw new Error(data.error || 'Error al anular el recibo');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert(`Error: ${error.message}`, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Event listeners
+    mobileMenuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    clientSearch.addEventListener('input', () => searchTransactions(clientSearch.value));
+    searchBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        searchTransactions(clientSearch.value);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+            searchResults.style.display = 'none';
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        cancellationForm.reset();
+        cancellationDate.value = today.toISOString().split('T')[0];
+        clientSearch.focus();
+    });
+
+    submitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleCancellation();
+    });
+
+    // Inicialización responsive
+    if (window.innerWidth < 576) {
+        document.querySelector('.search-btn-text').style.display = 'none';
+    }
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        document.querySelector('.search-btn-text').style.display = 
+            window.innerWidth < 576 ? 'none' : 'inline';
+    });
+});
+
+// Estilos para las alertas (agregar al CSS existente)
+const style = document.createElement('style');
+style.textContent = `
+    .custom-alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 400px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+        transition: opacity 0.5s;
+    }
+    
+    .alert-success {
+        background-color: #4CAF50;
+    }
+    
+    .alert-error {
+        background-color: #F44336;
+    }
+    
+    .close-alert {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin-left: 15px;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .fade-out {
+        opacity: 0;
+    }
+    
+    .search-result-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .search-result-item:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .no-results {
+        color: #666;
+        font-style: italic;
+    }
+    
+    .receipt-info {
+        margin-bottom: 5px;
+    }
+    
+    .receipt-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .amount {
+        font-weight: bold;
+        color: #333;
+    }
+`;
+document.head.appendChild(style);
+</script>
 </body>
 </html>

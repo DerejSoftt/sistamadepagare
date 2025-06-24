@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Préstamos - Análisis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Estilos base */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+     
+      background-color: #f1f5f9;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar - Actualizado con el nuevo diseño */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: white;
+      color: #1e293b;
+      padding: 1.5rem 1rem;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      z-index: 100;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      border-right: 1px solid #e2e8f0;
+    }
+    
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .sidebar-header img {
+      width: 40px;
+      margin-right: 12px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item-wrapper {
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: #64748b;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+    }
+
+    .nav-item i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background-color: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+    }
+
+    .nav-item.active {
+      background-color: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      font-weight: 600;
+    }
+    
+    /* Botón de menú móvil */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 101;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .mobile-menu-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Overlay para cerrar menú en móvil */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      backdrop-filter: blur(2px);
+    }
+    
+    /* Contenido principal */
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      margin-left: 280px;
+      transition: margin-left 0.3s ease;
+    }
+    
+    .page-title {
+      color: #2563eb;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    
+    .page-description {
+      color: #6b7280;
+      margin-bottom: 30px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      margin-bottom: 20px;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .tab-button {
+      padding: 10px 20px;
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .tab-button.active {
+      background-color: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+    
+    /* Cards */
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card-title {
+      color: #2563eb;
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .chart-container {
+      height: 400px;
+      position: relative;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .overlay.show {
+        display: block;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 80px 20px 20px 20px;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+        margin-top: 3rem;
+      }
+      
+      .tab-buttons {
+        justify-content: center;
+      }
+      
+      .tab-button {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+      
+      .card {
+        padding: 15px;
+      }
+      
+      .card-title {
+        font-size: 1rem;
+      }
+      
+      .chart-container {
+        height: 300px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 80px 10px 10px 10px;
+      }
+      
+      .tab-buttons {
+        flex-direction: column;
+      }
+      
+      .tab-button {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      
+      .page-title {
+        font-size: 1.3rem;
+      }
+      
+      .chart-container {
+        height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón de menú móvil -->
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+    <i class="fas fa-bars"></i>
+  </button>
+  
+  <!-- Overlay para cerrar menú -->
+  <div class="overlay" onclick="closeMobileMenu()"></div>
+  
+  <div class="container">
+    <!-- Sidebar - Actualizado -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Sistema Préstamos</h2>
+      </div>
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item-wrapper">
+            <a href="#" class="nav-item">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item-wrapper">
+            <a href="{% url 'formulario' %}" class="nav-item">
+              <i class="fas fa-user-plus"></i>
+              <span>Registrar Cliente</span>
+            </a>
+          </li>
+          <li class="nav-item-wrapper">
+            <a href="{% url 'clientes' %} " class="nav-item">
+              <i class="fas fa-users"></i>
+              <span>Perfil del Cliente</span>
+            </a>
+          </li>
+          <li class="nav-item-wrapper">
+                <a href="{% url 'despacho' %}" class="nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Despacho</span>
+                </a>
+            </li>
+
+            <li class="nav-item-wrapper">
+                <a href="{% url 'registrodepago' %}" class="nav-item">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>Préstamos y Abonos</span>
+                </a>
+            </li>
+            <li class="nav-item-wrapper">
+                <a href="{% url 'prestamospagados' %} " class="nav-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Préstamos Pagados</span>
+                </a>
+            </li>
+            <li class="nav-item-wrapper">
+                <a href="{% url 'anulacion' %}" class="nav-item">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Anulaciones de facturas</span>
+                </a>
+            </li>
+            <li class="nav-item-wrapper">
+                <a href="{% url 'anulacionderesivo' %}" class="nav-item ">
+                    <i class="fas fa-ban"></i>
+                    <span>Anulaciones de recibos</span>
+                </a>
+            </li>
+
+             <li class="nav-item-wrapper">
+                <a href="{% url 'reimprimir' %}" class="nav-item nav-item">
+                    <i class="fas fa-print"></i>
+                    <span>rimprimir prestamos </span>
+                </a>
+            </li>
+
+            
+            <li class="nav-item-wrapper">
+                <a href="{% url 'reporte' %}" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>reportes</span>
+                </a>
+            </li>
+          <li class="nav-item-wrapper">
+            <a href="{% url 'index' %} " class="nav-item">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="main-content">
+      <h1 class="page-title">Análisis de Préstamos</h1>
+      <p class="page-description">Visualización de datos sobre deudas de clientes y métodos de pago utilizados</p>
+      
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab-buttons">
+          <button class="tab-button active" onclick="showTab('deudas')">Clientes con Mayor Deuda</button>
+          <button class="tab-button" onclick="showTab('pagos')">Métodos de Pago</button>
+          <button class="tab-button" onclick="showTab('mejores-pagadores')">Mejores Pagadores</button>
+        </div>
+        
+        <!-- Tab: Deudas -->
+        <div id="deudas-tab" class="tab-content">
+          <div class="card">
+            <h2 class="card-title"><i class="fas fa-chart-bar"></i> Top Clientes por Deuda</h2>
+            <div class="chart-container">
+              <canvas id="deudas-chart"></canvas>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h2 class="card-title"><i class="fas fa-chart-pie"></i> Distribución de Deudas</h2>
+            <div class="chart-container">
+              <canvas id="deudas-pie-chart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Pagos -->
+        <div id="pagos-tab" class="tab-content" style="display: none;">
+          <div class="card">
+            <h2 class="card-title"><i class="fas fa-chart-pie"></i> Métodos de Pago Utilizados</h2>
+            <div class="chart-container">
+              <canvas id="pagos-pie-chart"></canvas>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h2 class="card-title"><i class="fas fa-chart-bar"></i> Frecuencia de Uso</h2>
+            <div class="chart-container">
+              <canvas id="pagos-chart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab: Mejores Pagadores -->
+        <div id="mejores-pagadores-tab" class="tab-content" style="display: none;">
+          <div class="card">
+            <h2 class="card-title"><i class="fas fa-trophy"></i> Clientes que Más Pagan</h2>
+            <div class="chart-container">
+              <canvas id="mejores-pagadores-chart"></canvas>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h2 class="card-title"><i class="fas fa-calendar-check"></i> Historial de Pagos por Cliente</h2>
+            <div class="chart-container">
+              <canvas id="historial-pagos-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Datos de ejemplo
+    const clientesDeudores = [
+      { nombre: "Juan Pérez", deuda: 15000 },
+      { nombre: "María Rodríguez", deuda: 25000 },
+      { nombre: "Carlos Sánchez", deuda: 18500 },
+      { nombre: "Ana Martínez", deuda: 32000 },
+      { nombre: "Luis Gómez", deuda: 9800 },
+    ];
+
+    const metodosPago = [
+      { metodo: "Efectivo", cantidad: 45 },
+      { metodo: "Transferencia", cantidad: 32 },
+      { metodo: "Tarjeta de crédito", cantidad: 18 },
+      { metodo: "Cheque", cantidad: 5 },
+    ];
+    
+    // Datos de los mejores pagadores
+    const mejoresPagadores = [
+      { nombre: "Roberto Fernández", pagado: 45000 },
+      { nombre: "Elena Díaz", pagado: 38000 },
+      { nombre: "Miguel Torres", pagado: 32500 },
+      { nombre: "Laura Ramírez", pagado: 28000 },
+      { nombre: "Pedro Morales", pagado: 22000 },
+    ];
+    
+    // Datos de historial de pagos por cliente
+    const historialPagos = {
+      labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
+      datasets: [
+        {
+          label: 'Roberto Fernández',
+          data: [8000, 7500, 8500, 7000, 7500, 6500],
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.1)',
+          borderWidth: 2,
+          tension: 0.3
+        },
+        {
+          label: 'Elena Díaz',
+          data: [6500, 7000, 6000, 6500, 6000, 6000],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.1)',
+          borderWidth: 2,
+          tension: 0.3
+        },
+        {
+          label: 'Miguel Torres',
+          data: [5500, 5000, 6000, 5500, 5500, 5000],
+          borderColor: 'rgba(153, 102, 255, 1)',
+          backgroundColor: 'rgba(153, 102, 255, 0.1)',
+          borderWidth: 2,
+          tension: 0.3
+        }
+      ]
+    };
+
+    // Funciones para el menú móvil
+    function toggleMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.overlay');
+      
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+    }
+    
+    function closeMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.overlay');
+      
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+    
+    // Cerrar menú al hacer clic en un enlace de navegación (móvil)
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          closeMobileMenu();
+        }
+      });
+    });
+
+    // Función para mostrar tabs
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+      });
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      document.getElementById(`${tabName}-tab`).style.display = 'block';
+      document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+    }
+
+    // Crear gráficos cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      // Gráfico de barras para deudas
+      const deudasCtx = document.getElementById('deudas-chart').getContext('2d');
+      new Chart(deudasCtx, {
+        type: 'bar',
+        data: {
+          labels: clientesDeudores.map(c => c.nombre),
+          datasets: [{
+            label: 'Deuda por Cliente (RD$)',
+            data: clientesDeudores.map(c => c.deuda),
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(255, 159, 64, 0.7)',
+              'rgba(255, 99, 132, 0.7)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return 'RD$ ' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'RD$ ' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Gráfico circular para distribución de deudas
+      const deudasPieCtx = document.getElementById('deudas-pie-chart').getContext('2d');
+      new Chart(deudasPieCtx, {
+        type: 'pie',
+        data: {
+          labels: clientesDeudores.map(c => c.nombre),
+          datasets: [{
+            label: 'Porcentaje de Deuda',
+            data: clientesDeudores.map(c => c.deuda),
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(255, 159, 64, 0.7)',
+              'rgba(255, 99, 132, 0.7)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${context.label}: RD$ ${value.toLocaleString()} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Gráfico circular para métodos de pago
+      const pagosPieCtx = document.getElementById('pagos-pie-chart').getContext('2d');
+      new Chart(pagosPieCtx, {
+        type: 'pie',
+        data: {
+          labels: metodosPago.map(m => m.metodo),
+          datasets: [{
+            label: 'Distribución de Métodos de Pago',
+            data: metodosPago.map(m => m.cantidad),
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(255, 159, 64, 0.7)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${context.label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Gráfico de barras para frecuencia de uso de métodos de pago
+      const pagosCtx = document.getElementById('pagos-chart').getContext('2d');
+      new Chart(pagosCtx, {
+        type: 'bar',
+        data: {
+          labels: metodosPago.map(m => m.metodo),
+          datasets: [{
+            label: 'Cantidad de Usos por Método',
+            data: metodosPago.map(m => m.cantidad),
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(255, 159, 64, 0.7)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      
+      // Gráfico de barras para mejores pagadores
+      const mejoresPagadoresCtx = document.getElementById('mejores-pagadores-chart').getContext('2d');
+      new Chart(mejoresPagadoresCtx, {
+        type: 'bar',
+        data: {
+          labels: mejoresPagadores.map(c => c.nombre),
+          datasets: [{
+            label: 'Total Pagado (RD$)',
+            data: mejoresPagadores.map(c => c.pagado),
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(153, 102, 255, 0.7)',
+              'rgba(255, 159, 64, 0.7)',
+              'rgba(255, 99, 132, 0.7)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return 'RD$ ' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'RD$ ' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // Gráfico de líneas para historial de pagos
+      const historialPagosCtx = document.getElementById('historial-pagos-chart').getContext('2d');
+      new Chart(historialPagosCtx, {
+        type: 'line',
+        data: historialPagos,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return 'RD$ ' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': RD$ ' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

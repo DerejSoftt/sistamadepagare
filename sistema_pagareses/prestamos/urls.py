@@ -5,12 +5,13 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("anulacion", views.anulacion, name="anulacion"),
+    path("reporte", views.reporte, name="reporte"),
     path("anulacionderesivo", views.anulacionderesivo, name="anulacionderesivo"),
     path("clientes", views.clientes, name="clientes"),
     path("despacho", views.despacho, name="despacho"),
     path("facturas", views.facturas, name="facturas"),
     path("formulario", views.formulario, name="formulario"),
-    path("login", views.login, name="login"),
+    # path("login", views.login, name="login"),
     path("prestamospagados", views.prestamospagados, name="prestamospagados"),
     path("registrodepago", views.registrodepago, name="registrodepago"),
     path("reimprimir", views.reimprimir, name="reimprimir"),
@@ -29,6 +30,12 @@ urlpatterns = [
     path('imprimir-pagare/<str:numero_factura>/', views.imprimir_pagare, name='imprimir_pagare'),
     path('prestamos/toggle-status/<int:loan_id>/', views.toggle_loan_status, name='toggle_loan_status'),
     path('prestamos/delete/<int:loan_id>/', views.delete_loan, name='delete_loan'),
+
+    path('search_receipts/', views.search_receipts, name='search_receipts'),
+    # path('cancel_receipt/', views.cancel_receipt, name='cancel_receipt'),
+    path('debug_receipts/', views.debug_receipts, name='debug_receipts'),
+    
+    path('anular_recibo/', views.anular_recibo, name='anular_recibo'),
 ]
 
 

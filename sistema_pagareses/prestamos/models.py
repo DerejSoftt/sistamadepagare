@@ -4,6 +4,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.utils.timezone import now
 from decimal import Decimal
+from django.conf import settings
 
 
 
@@ -95,9 +96,6 @@ class Prestamo(models.Model):
 
 
 
-
-
-
 class Ingreso(models.Model):
     # Opciones para los campos de selección
     METODO_PAGO_OPCIONES = [
@@ -111,6 +109,14 @@ class Ingreso(models.Model):
     TIPO_PAGO_OPCIONES = [
         ('COMPLETO', 'Pago Completo'),
         ('ABONO', 'Abono'),
+    ]
+    
+    MOTIVO_ANULACION_OPCIONES = [
+        ('ERROR_MONTO', 'Error en el monto'),
+        ('RECIBO_DUPLICADO', 'Recibo duplicado'),
+        ('SOLICITUD_CLIENTE', 'Solicitud del cliente'),
+        ('ERROR_SISTEMA', 'Error del sistema'),
+        ('OTRO', 'Otro'),
     ]
 
     # Campos del modelo
@@ -171,6 +177,45 @@ class Ingreso(models.Model):
         auto_now_add=True,
         help_text="Fecha y hora en que se registró el ingreso en el sistema"
     )
+    
+    # Campos para anulación
+    anulado = models.BooleanField(
+        'Anulado',
+        default=False,
+        help_text="Indica si el recibo ha sido anulado"
+    )
+    
+    fecha_anulacion = models.DateField(
+        'Fecha de Anulación',
+        null=True,
+        blank=True,
+        help_text="Fecha en que se anuló el recibo"
+    )
+    
+    motivo_anulacion = models.CharField(
+        'Motivo de Anulación',
+        max_length=20,
+        choices=MOTIVO_ANULACION_OPCIONES,
+        null=True,
+        blank=True,
+        help_text="Motivo por el cual se anuló el recibo"
+    )
+    
+    notas_anulacion = models.TextField(
+        'Notas de Anulación',
+        blank=True,
+        null=True,
+        help_text="Observaciones adicionales sobre la anulación"
+    )
+    
+    anulado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='anulaciones_realizadas',
+        help_text="Usuario que realizó la anulación"
+    )
 
     class Meta:
         verbose_name = 'Ingreso'
@@ -179,4 +224,73 @@ class Ingreso(models.Model):
         db_table = 'ingreso'
 
     def __str__(self):
-        return f"Recibo {self.no_recibo} - {self.monto_pago} ({self.fecha_pago}) - {self.get_tipo_pago_display()}"
+        status = "ANULADO" if self.anulado else "ACTIVO"
+        return f"Recibo {self.no_recibo} - {self.monto_pago} ({self.fecha_pago}) - {status}"
+
+    def cancelar(self, motivo, notas, fecha_anulacion=None, usuario=None):
+        """
+        Cancela el recibo
+        """
+        try:
+            if self.anulado:
+                return False, "Este recibo ya está anulado"
+            
+            self.anulado = True
+            self.motivo_anulacion = motivo
+            self.notas_anulacion = notas
+            
+            if fecha_anulacion:
+                if isinstance(fecha_anulacion, str):
+                    from datetime import datetime
+                    self.fecha_anulacion = datetime.strptime(fecha_anulacion, '%Y-%m-%d')
+                else:
+                    self.fecha_anulacion = fecha_anulacion
+            else:
+                self.fecha_anulacion = timezone.now()
+            
+            self.save()
+            
+            return True, f"Recibo {self.no_recibo} anulado exitosamente"
+            
+        except Exception as e:
+            return False, f"Error al anular el recibo: {str(e)}"
+    
+    def __str__(self):
+        return f"Recibo {self.no_recibo} - {self.monto_pago}"
+    
+
+
+
+
+
+# models.py
+class RecibosAnulados(models.Model):
+    # Copia todos los campos del modelo Ingreso
+    no_recibo = models.CharField('Número de Recibo', max_length=50)
+    prestamo = models.ForeignKey('Prestamo', on_delete=models.SET_NULL, null=True, blank=True)
+    monto_pago = models.DecimalField('Monto del Pago', max_digits=10, decimal_places=2)
+    fecha_pago = models.DateField('Fecha de Pago')
+    metodo_pago = models.CharField('Método de Pago', max_length=20)
+    tipo_pago = models.CharField('Tipo de Pago', max_length=20)
+    notas = models.TextField('Notas', blank=True, null=True)
+    fecha_registro = models.DateTimeField('Fecha de Registro')
+    
+    # Campos específicos de anulación
+    motivo_anulacion = models.CharField('Motivo de Anulación', max_length=20)
+    notas_anulacion = models.TextField('Notas de Anulación')
+    fecha_anulacion = models.DateField('Fecha de Anulación')
+    anulado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='recibos_anulados'
+    )
+    
+    class Meta:
+        verbose_name = 'Recibo Anulado'
+        verbose_name_plural = 'Recibos Anulados'
+        ordering = ['-fecha_anulacion']
+        
+    def __str__(self):
+        return f"Recibo Anulado {self.no_recibo} - {self.monto_pago}"
