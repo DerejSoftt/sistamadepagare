@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.utils.timezone import now
@@ -294,3 +294,195 @@ class RecibosAnulados(models.Model):
         
     def __str__(self):
         return f"Recibo Anulado {self.no_recibo} - {self.monto_pago}"
+    
+
+
+
+
+
+#prestamos 
+
+class OtroPrestamo(models.Model):
+    TIPO_PRESTAMO_CHOICES = [
+        ('personal', 'Préstamo Personal'),
+        ('vehiculo', 'Préstamo para Vehículo'),
+        ('vivienda', 'Préstamo para Vivienda'),
+        ('negocio', 'Préstamo para Negocio'),
+        ('emergencia', 'Préstamo de Emergencia'),
+        ('educacion', 'Préstamo Educativo'),
+    ]
+    
+    FRECUENCIA_PAGO_CHOICES = [
+        (1, 'Mensual'),
+        (2, 'Quincenal'),
+        (4, 'Semanal'),
+    ]
+    
+    # Relación con el cliente
+    cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, related_name='otros_prestamos')
+    
+    tipo_prestamo = models.CharField(
+        max_length=20,
+        choices=TIPO_PRESTAMO_CHOICES,
+        verbose_name='Tipo de préstamo'
+    )
+    
+    monto = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name='Monto del préstamo',
+        validators=[MinValueValidator(0)]
+    )
+    
+    tasa_interes = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name='Tasa de interés mensual (%)',
+        validators=[MinValueValidator(0), MaxValueValidator(100)]
+    )
+    
+    plazo_meses = models.PositiveSmallIntegerField(
+        verbose_name='Plazo (meses)',
+        validators=[MinValueValidator(1), MaxValueValidator(12)]
+    )
+    
+    frecuencia_pagos = models.PositiveSmallIntegerField(
+        choices=FRECUENCIA_PAGO_CHOICES,
+        verbose_name='Frecuencia de pagos'
+    )
+    
+    tasa_mora = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        verbose_name='Tasa de mora por retraso (%)',
+        default=2.00,
+        validators=[MinValueValidator(0)]
+    )
+    
+    fecha_calculo = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de cálculo'
+    )
+    
+    # Campos calculados
+    total_intereses = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name='Intereses totales',
+        validators=[MinValueValidator(0)]
+    )
+    
+    total_pagar = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name='Total a pagar',
+        validators=[MinValueValidator(0)]
+    )
+    
+    pago_periodico = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        verbose_name='Pago por período',
+        validators=[MinValueValidator(0)]
+    )
+
+    observacion = models.TextField(
+        verbose_name='Observación',
+        blank=True,
+        null=True,
+        max_length=500
+    )
+
+    class Meta:
+        db_table = 'otros_prestamos'
+        verbose_name = 'Otro Préstamo'
+        verbose_name_plural = 'Otros Préstamos'
+        ordering = ['-fecha_calculo']
+    
+    def __str__(self):
+        return f"Préstamo {self.get_tipo_prestamo_display()} - {self.cliente} - RD${self.monto}"
+    
+    def save(self, *args, **kwargs):
+        # Calcular los valores antes de guardar
+        if not self.pk:  # Solo para nuevos préstamos
+            total_pagos = self.plazo_meses * self.frecuencia_pagos
+            interes_total = self.monto * (self.tasa_interes / 100) * self.plazo_meses
+            self.total_intereses = interes_total
+            self.total_pagar = self.monto + interes_total
+            self.pago_periodico = self.total_pagar / total_pagos
+        super().save(*args, **kwargs)
+    
+    def generar_tabla_amortizacion(self):
+        """
+        Método para generar la tabla de amortización similar a la del HTML
+        Devuelve una lista de diccionarios con los datos de cada pago
+        """
+        tabla = []
+        saldo = self.monto
+        total_pagos = self.plazo_meses * self.frecuencia_pagos
+        pago_capital = self.monto / total_pagos
+        interes_por_periodo = (self.monto * (self.tasa_interes / 100)) / self.frecuencia_pagos
+        
+        for i in range(1, total_pagos + 1):
+            total_pago = pago_capital + interes_por_periodo
+            saldo -= pago_capital
+            
+            tabla.append({
+                'numero': i,
+                'capital': round(pago_capital, 2),
+                'interes': round(interes_por_periodo, 2),
+                'total_pago': round(total_pago, 2),
+                'balance': round(saldo if saldo > 0 else 0, 2)
+            })
+        
+        return tabla
+
+
+
+
+# class Amortizacion(models.Model):
+#     prestamo = models.ForeignKey(
+#         'OtroPrestamo',
+#         on_delete=models.CASCADE,
+#         related_name='amortizaciones'
+#     )
+#     numero_pago = models.PositiveSmallIntegerField(verbose_name='Número de pago')
+#     capital = models.DecimalField(
+#         max_digits=12,
+#         decimal_places=2,
+#         verbose_name='Capital',
+#         validators=[MinValueValidator(0)]
+#     )
+#     interes = models.DecimalField(
+#         max_digits=12,
+#         decimal_places=2,
+#         verbose_name='Interés',
+#         validators=[MinValueValidator(0)]
+#     )
+#     total_pago = models.DecimalField(
+#         max_digits=12,
+#         decimal_places=2,
+#         verbose_name='Total pago',
+#         validators=[MinValueValidator(0)]
+#     )
+#     balance = models.DecimalField(
+#         max_digits=12,
+#         decimal_places=2,
+#         verbose_name='Balance pendiente',
+#         validators=[MinValueValidator(0)]
+#     )
+#     fecha_pago = models.DateField(
+#         blank=True,
+#         null=True,
+#         verbose_name='Fecha de pago real'
+#     )
+#     pagado = models.BooleanField(default=False, verbose_name='¿Pagado?')
+
+#     class Meta:
+#         db_table = 'amortizaciones_prestamos'
+#         verbose_name = 'Amortización'
+#         verbose_name_plural = 'Amortizaciones'
+#         ordering = ['prestamo', 'numero_pago']
+
+#     def __str__(self):
+#         return f"Pago {self.numero_pago} - {self.prestamo}"

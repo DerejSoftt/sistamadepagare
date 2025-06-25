@@ -36,6 +36,9 @@ urlpatterns = [
     path('debug_receipts/', views.debug_receipts, name='debug_receipts'),
     
     path('anular_recibo/', views.anular_recibo, name='anular_recibo'),
+    path('calc', views.calc, name='calc'),
+    path('buscador-cliente/', views.buscador_cliente, name='buscador_cliente'),  # URL actualiza
+
 ]
 
 
