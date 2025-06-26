@@ -26,6 +26,7 @@ class Cliente(models.Model):
         ('SP', 'San Pedro de Macorís'),
         ('SC', 'San Cristóbal'),
         ('HR', 'Hermanas Mirabal'),
+        ('MC', 'Montecristi'),
     ]
     
     TIPO_CUENTA_CHOICES = [

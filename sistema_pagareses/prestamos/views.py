@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from decimal import Decimal,  InvalidOperation
 import json
 
-from django.db.models import Sum, Q, F, DecimalField, ExpressionWrapper, OuterRef
+from django.db.models import Sum, Q, F, DecimalField, ExpressionWrapper, OuterRef, Count, Value, CharField
 from django.db.models.functions import Coalesce
 from django.db.models.expressions import ExpressionWrapper
 
@@ -39,7 +39,12 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
 from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
+from django.db.models.functions import ExtractMonth, ExtractYear, Concat
+from django.db import models
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def formulario(request):
     if request.method == 'POST':
         data = request.POST
@@ -121,9 +126,66 @@ def formulario(request):
 
 
 def reporte(request):
-    return render(request, "prestamos/reporte.html")
-
-
+    # 1. Clientes con mayor deuda (préstamos activos)
+    clientes_deudores = Prestamo.objects.filter(estado='ACTIVO') \
+        .annotate(
+            nombre_completo=Concat(
+                'cliente__nombres',
+                Value(' '),
+                'cliente__apellidos',
+                output_field=CharField()
+            )
+        ) \
+        .values('nombre_completo', 'cliente__numero_identificacion') \
+        .annotate(total_deuda=Sum('monto')) \
+        .order_by('-total_deuda')[:5]
+    
+    # 2. Métodos de pago más utilizados
+    metodos_pago = Ingreso.objects.filter(anulado=False) \
+        .values('metodo_pago') \
+        .annotate(total=Count('id')) \
+        .order_by('-total')
+    
+    # 3. Mejores pagadores (clientes que más han pagado)
+    mejores_pagadores = Ingreso.objects.filter(anulado=False) \
+        .annotate(
+            nombre_completo=Concat(
+                'prestamo__cliente__nombres',
+                Value(' '),
+                'prestamo__cliente__apellidos',
+                output_field=CharField()
+            )
+        ) \
+        .values('nombre_completo', 'prestamo__cliente__numero_identificacion') \
+        .annotate(total_pagado=Sum('monto_pago')) \
+        .order_by('-total_pagado')[:5]
+    
+    # 4. Historial de pagos por mes
+    historial_data = {}
+    for pago in mejores_pagadores:
+        pagos_por_mes = Ingreso.objects.filter(
+            anulado=False,
+            prestamo__cliente__numero_identificacion=pago['prestamo__cliente__numero_identificacion']
+        ) \
+        .annotate(
+            month=ExtractMonth('fecha_pago'),
+            year=ExtractYear('fecha_pago')
+        ) \
+        .values('month', 'year') \
+        .annotate(total=Sum('monto_pago')) \
+        .order_by('year', 'month')
+        
+        historial_data[pago['nombre_completo']] = list(pagos_por_mes)
+    
+    # Convertir los QuerySets a listas y serializar correctamente
+    context = {
+        'clientes_deudores': json.dumps(list(clientes_deudores), cls=DjangoJSONEncoder),
+        'metodos_pago': json.dumps(list(metodos_pago), cls=DjangoJSONEncoder),
+        'mejores_pagadores': json.dumps(list(mejores_pagadores), cls=DjangoJSONEncoder),
+        'historial_data': json.dumps(historial_data, cls=DjangoJSONEncoder),
+    }
+    
+    return render(request, "prestamos/reporte.html", context)
 
 
 def clientes(request):

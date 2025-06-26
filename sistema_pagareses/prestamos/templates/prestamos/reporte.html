@@ -439,358 +439,320 @@
       </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <script>
-    // Datos de ejemplo
-    const clientesDeudores = [
-      { nombre: "Juan Pérez", deuda: 15000 },
-      { nombre: "María Rodríguez", deuda: 25000 },
-      { nombre: "Carlos Sánchez", deuda: 18500 },
-      { nombre: "Ana Martínez", deuda: 32000 },
-      { nombre: "Luis Gómez", deuda: 9800 },
-    ];
-
-    const metodosPago = [
-      { metodo: "Efectivo", cantidad: 45 },
-      { metodo: "Transferencia", cantidad: 32 },
-      { metodo: "Tarjeta de crédito", cantidad: 18 },
-      { metodo: "Cheque", cantidad: 5 },
-    ];
-    
-    // Datos de los mejores pagadores
-    const mejoresPagadores = [
-      { nombre: "Roberto Fernández", pagado: 45000 },
-      { nombre: "Elena Díaz", pagado: 38000 },
-      { nombre: "Miguel Torres", pagado: 32500 },
-      { nombre: "Laura Ramírez", pagado: 28000 },
-      { nombre: "Pedro Morales", pagado: 22000 },
-    ];
-    
-    // Datos de historial de pagos por cliente
-    const historialPagos = {
-      labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
-      datasets: [
-        {
-          label: 'Roberto Fernández',
-          data: [8000, 7500, 8500, 7000, 7500, 6500],
-          borderColor: 'rgba(54, 162, 235, 1)',
-          backgroundColor: 'rgba(54, 162, 235, 0.1)',
-          borderWidth: 2,
-          tension: 0.3
-        },
-        {
-          label: 'Elena Díaz',
-          data: [6500, 7000, 6000, 6500, 6000, 6000],
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.1)',
-          borderWidth: 2,
-          tension: 0.3
-        },
-        {
-          label: 'Miguel Torres',
-          data: [5500, 5000, 6000, 5500, 5500, 5000],
-          borderColor: 'rgba(153, 102, 255, 1)',
-          backgroundColor: 'rgba(153, 102, 255, 0.1)',
-          borderWidth: 2,
-          tension: 0.3
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Función para parsear datos de Django de forma segura
+    function parseDjangoData(jsonString) {
+        try {
+            const data = JSON.parse(jsonString.replace(/None/g, 'null'));
+            console.log('Datos parseados:', data);
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error('Error parsing Django data:', e);
+            return [];
         }
-      ]
+    }
+
+    // Procesar datos de clientes deudores
+    const clientesDeudores = parseDjangoData('{{ clientes_deudores|escapejs }}').map(c => ({
+        nombre: c.nombre_completo || 'Cliente desconocido',
+        identificacion: c.cliente__numero_identificacion || 'N/A',
+        deuda: parseFloat(c.total_deuda) || 0
+    }));
+    console.log('Clientes deudores:', clientesDeudores);
+
+    // Procesar métodos de pago
+    const metodosPago = parseDjangoData('{{ metodos_pago|escapejs }}').map(m => ({
+        metodo: m.metodo_pago || 'Desconocido',
+        cantidad: parseInt(m.total) || 0
+    }));
+    console.log('Métodos de pago:', metodosPago);
+
+    // Procesar mejores pagadores
+    const mejoresPagadores = parseDjangoData('{{ mejores_pagadores|escapejs }}').map(c => ({
+        nombre: c.nombre_completo || 'Cliente desconocido',
+        identificacion: c.prestamo__cliente__numero_identificacion || 'N/A',
+        pagado: parseFloat(c.total_pagado) || 0
+    }));
+    console.log('Mejores pagadores:', mejoresPagadores);
+
+    // Procesar historial de pagos
+    const historialPagos = {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+        datasets: []
     };
 
-    // Funciones para el menú móvil
+    const colores = [
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(255, 99, 132, 0.7)'
+    ];
+
+    try {
+        const historialRawData = JSON.parse('{{ historial_data|escapejs }}'.replace(/None/g, 'null'));
+        console.log('Datos de historial:', historialRawData);
+
+        Object.entries(historialRawData).forEach(([cliente, datos], index) => {
+            const monthlyData = Array(12).fill(0);
+            
+            if (Array.isArray(datos)) {
+                datos.forEach(item => {
+                    const month = (parseInt(item.month) || 1) - 1;
+                    monthlyData[month] = parseFloat(item.total) || 0;
+                });
+            }
+            
+            historialPagos.datasets.push({
+                label: cliente,
+                data: monthlyData,
+                backgroundColor: colores[index % colores.length],
+                borderColor: colores[index % colores.length].replace('0.7)', '1)'),
+                borderWidth: 2,
+                tension: 0.3,
+                fill: false
+            });
+        });
+    } catch (e) {
+        console.error('Error procesando historial de pagos:', e);
+    }
+
+    // Funciones de UI
     function toggleMobileMenu() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.querySelector('.overlay');
-      
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('show');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
     }
     
     function closeMobileMenu() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.querySelector('.overlay');
-      
-      sidebar.classList.remove('open');
-      overlay.classList.remove('show');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.overlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
     }
-    
-    // Cerrar menú al hacer clic en un enlace de navegación (móvil)
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-          closeMobileMenu();
-        }
-      });
-    });
 
     // Función para mostrar tabs
     function showTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.style.display = 'none';
-      });
-      document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('active');
-      });
-      
-      document.getElementById(`${tabName}-tab`).style.display = 'block';
-      document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        const tabElement = document.getElementById(`${tabName}-tab`);
+        const buttonElement = document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`);
+        
+        if (tabElement) tabElement.style.display = 'block';
+        if (buttonElement) buttonElement.classList.add('active');
     }
+
+    // Configuración común para gráficos
+    const commonChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) label += ': ';
+                        const value = context.parsed?.y ?? context.raw;
+                        return `${label}RD$ ${value.toLocaleString()}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'RD$ ' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    };
 
     // Crear gráficos cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', function() {
-      // Gráfico de barras para deudas
-      const deudasCtx = document.getElementById('deudas-chart').getContext('2d');
-      new Chart(deudasCtx, {
-        type: 'bar',
-        data: {
-          labels: clientesDeudores.map(c => c.nombre),
-          datasets: [{
-            label: 'Deuda por Cliente (RD$)',
-            data: clientesDeudores.map(c => c.deuda),
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',
-              'rgba(75, 192, 192, 0.7)',
-              'rgba(153, 102, 255, 0.7)',
-              'rgba(255, 159, 64, 0.7)',
-              'rgba(255, 99, 132, 0.7)'
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-              'rgba(255, 99, 132, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return 'RD$ ' + value.toLocaleString();
-                }
-              }
-            }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return 'RD$ ' + context.raw.toLocaleString();
-                }
-              }
-            }
-          }
-        }
-      });
+        console.log('Inicializando gráficos...');
 
-      // Gráfico circular para distribución de deudas
-      const deudasPieCtx = document.getElementById('deudas-pie-chart').getContext('2d');
-      new Chart(deudasPieCtx, {
-        type: 'pie',
-        data: {
-          labels: clientesDeudores.map(c => c.nombre),
-          datasets: [{
-            label: 'Porcentaje de Deuda',
-            data: clientesDeudores.map(c => c.deuda),
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',
-              'rgba(75, 192, 192, 0.7)',
-              'rgba(153, 102, 255, 0.7)',
-              'rgba(255, 159, 64, 0.7)',
-              'rgba(255, 99, 132, 0.7)'
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-              'rgba(255, 99, 132, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.raw;
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = Math.round((value / total) * 100);
-                  return `${context.label}: RD$ ${value.toLocaleString()} (${percentage}%)`;
-                }
-              }
+        // 1. Gráfico de clientes con mayor deuda
+        if (clientesDeudores.length > 0) {
+            try {
+                new Chart(document.getElementById('deudas-chart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: clientesDeudores.map(c => `${c.nombre} (${c.identificacion})`),
+                        datasets: [{
+                            label: 'Deuda Total',
+                            data: clientesDeudores.map(c => c.deuda),
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: commonChartOptions
+                });
+            } catch (e) {
+                console.error('Error creando gráfico de deudas:', e);
             }
-          }
         }
-      });
 
-      // Gráfico circular para métodos de pago
-      const pagosPieCtx = document.getElementById('pagos-pie-chart').getContext('2d');
-      new Chart(pagosPieCtx, {
-        type: 'pie',
-        data: {
-          labels: metodosPago.map(m => m.metodo),
-          datasets: [{
-            label: 'Distribución de Métodos de Pago',
-            data: metodosPago.map(m => m.cantidad),
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',
-              'rgba(75, 192, 192, 0.7)',
-              'rgba(153, 102, 255, 0.7)',
-              'rgba(255, 159, 64, 0.7)'
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.raw;
-                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = Math.round((value / total) * 100);
-                  return `${context.label}: ${value} (${percentage}%)`;
-                }
-              }
+        // 2. Gráfico circular de distribución de deudas
+        if (clientesDeudores.length > 0) {
+            try {
+                new Chart(document.getElementById('deudas-pie-chart').getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: clientesDeudores.map(c => `${c.nombre} (${c.identificacion})`),
+                        datasets: [{
+                            label: 'Distribución de Deuda',
+                            data: clientesDeudores.map(c => c.deuda),
+                            backgroundColor: colores.slice(0, clientesDeudores.length),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...commonChartOptions,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${context.label}: RD$ ${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error creando gráfico circular de deudas:', e);
             }
-          }
         }
-      });
 
-      // Gráfico de barras para frecuencia de uso de métodos de pago
-      const pagosCtx = document.getElementById('pagos-chart').getContext('2d');
-      new Chart(pagosCtx, {
-        type: 'bar',
-        data: {
-          labels: metodosPago.map(m => m.metodo),
-          datasets: [{
-            label: 'Cantidad de Usos por Método',
-            data: metodosPago.map(m => m.cantidad),
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',
-              'rgba(75, 192, 192, 0.7)',
-              'rgba(153, 102, 255, 0.7)',
-              'rgba(255, 159, 64, 0.7)'
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true
+        // 3. Gráfico circular de métodos de pago
+        if (metodosPago.length > 0) {
+            try {
+                new Chart(document.getElementById('pagos-pie-chart').getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: metodosPago.map(m => m.metodo),
+                        datasets: [{
+                            label: 'Métodos de Pago',
+                            data: metodosPago.map(m => m.cantidad),
+                            backgroundColor: colores.slice(0, metodosPago.length)
+                        }]
+                    },
+                    options: {
+                        ...commonChartOptions,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `${context.label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error creando gráfico de métodos de pago:', e);
             }
-          }
         }
-      });
-      
-      // Gráfico de barras para mejores pagadores
-      const mejoresPagadoresCtx = document.getElementById('mejores-pagadores-chart').getContext('2d');
-      new Chart(mejoresPagadoresCtx, {
-        type: 'bar',
-        data: {
-          labels: mejoresPagadores.map(c => c.nombre),
-          datasets: [{
-            label: 'Total Pagado (RD$)',
-            data: mejoresPagadores.map(c => c.pagado),
-            backgroundColor: [
-              'rgba(54, 162, 235, 0.7)',
-              'rgba(75, 192, 192, 0.7)',
-              'rgba(153, 102, 255, 0.7)',
-              'rgba(255, 159, 64, 0.7)',
-              'rgba(255, 99, 132, 0.7)'
-            ],
-            borderColor: [
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-              'rgba(255, 99, 132, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return 'RD$ ' + value.toLocaleString();
-                }
-              }
+
+        // 4. Gráfico de barras de frecuencia de métodos de pago
+        if (metodosPago.length > 0) {
+            try {
+                new Chart(document.getElementById('pagos-chart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: metodosPago.map(m => m.metodo),
+                        datasets: [{
+                            label: 'Frecuencia de Uso',
+                            data: metodosPago.map(m => m.cantidad),
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: commonChartOptions
+                });
+            } catch (e) {
+                console.error('Error creando gráfico de frecuencia de pagos:', e);
             }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return 'RD$ ' + context.raw.toLocaleString();
-                }
-              }
-            }
-          }
         }
-      });
-      
-      // Gráfico de líneas para historial de pagos
-      const historialPagosCtx = document.getElementById('historial-pagos-chart').getContext('2d');
-      new Chart(historialPagosCtx, {
-        type: 'line',
-        data: historialPagos,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return 'RD$ ' + value.toLocaleString();
-                }
-              }
+
+        // 5. Gráfico de mejores pagadores
+        if (mejoresPagadores.length > 0) {
+            try {
+                new Chart(document.getElementById('mejores-pagadores-chart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: mejoresPagadores.map(c => `${c.nombre} (${c.identificacion})`),
+                        datasets: [{
+                            label: 'Total Pagado',
+                            data: mejoresPagadores.map(c => c.pagado),
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: commonChartOptions
+                });
+            } catch (e) {
+                console.error('Error creando gráfico de mejores pagadores:', e);
             }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.dataset.label + ': RD$ ' + context.raw.toLocaleString();
-                }
-              }
-            }
-          }
         }
-      });
+
+        // 6. Gráfico de historial de pagos
+        if (historialPagos.datasets.length > 0) {
+            try {
+                new Chart(document.getElementById('historial-pagos-chart').getContext('2d'), {
+                    type: 'line',
+                    data: historialPagos,
+                    options: {
+                        ...commonChartOptions,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error creando gráfico de historial de pagos:', e);
+            }
+        }
+
+        // Mostrar primera pestaña por defecto
+        showTab('deudas');
     });
-  </script>
+
+    // Cerrar menú al hacer clic en enlaces (versión móvil)
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeMobileMenu();
+            }
+        });
+    });
+</script>
 </body>
 </html>
