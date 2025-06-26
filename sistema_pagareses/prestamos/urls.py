@@ -38,6 +38,7 @@ urlpatterns = [
     path('anular_recibo/', views.anular_recibo, name='anular_recibo'),
     path('calc', views.calc, name='calc'),
     path('buscador-cliente/', views.buscador_cliente, name='buscador_cliente'),  # URL actualiza
+    path('facturadeprestamos/<int:prestamo_id>/', views.facturadeprestamos, name='facturadeprestamos'),
 
 ]
 

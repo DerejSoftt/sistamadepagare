@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura de Préstamo</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10mm;
+            color: #333;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .invoice-container {
+            width: 100%;
+            max-width: 190mm;
+            margin: 0 auto;
+            padding: 5mm;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5mm;
+            padding-bottom: 5mm;
+            border-bottom: 1px solid #eee;
+        }
+        .company-info {
+            flex: 2;
+            text-align: left;
+        }
+        .invoice-info {
+            flex: 1;
+            text-align: right;
+        }
+        .logo {
+            max-width: 40mm;
+            max-height: 20mm;
+            margin-bottom: 2mm;
+        }
+        h1 {
+            font-size: 16px;
+            margin: 0 0 3mm 0;
+            color: #2563eb;
+        }
+        h2 {
+            font-size: 14px;
+            margin: 5mm 0 3mm 0;
+            color: #2563eb;
+        }
+        p {
+            margin: 1mm 0;
+        }
+        .client-info, .details-box {
+            padding: 3mm;
+            background-color: #f8fafc;
+            border-radius: 2mm;
+            margin-bottom: 3mm;
+        }
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3mm;
+        }
+        .details-box {
+            width: 48%;
+        }
+        .summary {
+            margin: 5mm 0;
+            padding: 3mm;
+            background-color: #f0f7ff;
+            border-radius: 2mm;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3mm;
+            margin-top: 3mm;
+        }
+        .summary-card {
+            padding: 3mm;
+            background-color: white;
+            border-radius: 2mm;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .summary-card h3 {
+            margin: 0 0 2mm 0;
+            font-size: 11px;
+            color: #64748b;
+        }
+        .summary-card p {
+            margin: 0;
+            font-size: 13px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 3mm 0;
+            font-size: 11px;
+        }
+        th {
+            background-color: #2563eb;
+            color: white;
+            padding: 2mm;
+            text-align: center;
+            font-weight: normal;
+        }
+        td {
+            padding: 2mm;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .footer {
+            margin-top: 5mm;
+            padding-top: 3mm;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 10px;
+            color: #64748b;
+        }
+        .signature {
+            margin-top: 10mm;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-line {
+            width: 60mm;
+            border-top: 1px solid #333;
+            text-align: center;
+            padding-top: 2mm;
+            font-size: 11px;
+        }
+        .observations {
+            margin: 3mm 0;
+            padding: 3mm;
+            background-color: #f8fafc;
+            border-radius: 2mm;
+        }
+        .no-print {
+            text-align: center;
+            margin-top: 5mm;
+        }
+        .print-btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 2mm 4mm;
+            border-radius: 2mm;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .invoice-container {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+            .no-print {
+                display: none;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-info">
+                <h1>Sistema de Préstamos RD</h1>
+                <p>Calle Principal #123, Santo Domingo</p>
+                <p>Tel: (809) 555-1234 | RNC: 1-01-123456-7</p>
+            </div>
+            <div class="invoice-info">
+                <h2>FACTURA DE PRÉSTAMO</h2>
+                <p><strong>No.:</strong> {{ prestamo.id }}</p>
+                <p><strong>Fecha:</strong> {{ fecha_actual|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+
+        <div class="client-info">
+            <h2>INFORMACIÓN DEL CLIENTE</h2>
+            <div style="display: flex; justify-content: space-between;">
+                <div style="width: 60%;">
+                    <p><strong>Nombre:</strong> {{ prestamo.cliente.nombres }}</p>
+                    <p><strong>Cédula:</strong> {{ prestamo.cliente.numero_identificacion }}</p>
+                </div>
+                <div style="width: 35%;">
+                    {% if prestamo.cliente.telefono %}
+                    <p><strong>Teléfono:</strong> {{ prestamo.cliente.telefono }}</p>
+                    {% endif %}
+                    {% if prestamo.cliente.direccion %}
+                    <p><strong>Dirección:</strong> {{ prestamo.cliente.direccion }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="details-row">
+            <div class="details-box">
+                <h3>DETALLES DEL PRÉSTAMO</h3>
+                <p><strong>Tipo:</strong> {{ prestamo.get_tipo_display }}</p>
+                <p><strong>Monto:</strong> {{ prestamo.monto|floatformat:2 }} RD$</p>
+                <p><strong>Tasa interés:</strong> {{ prestamo.tasa }}% mensual</p>
+            </div>
+            <div class="details-box">
+                <h3>TÉRMINOS DEL PRÉSTAMO</h3>
+                <p><strong>Plazo:</strong> {{ prestamo.plazo }} meses</p>
+                <p><strong>Frecuencia pagos:</strong> {{ prestamo.get_frecuencia_display }}</p>
+                <p><strong>Tasa mora:</strong> {{ prestamo.tasa_mora }}% diario</p>
+            </div>
+        </div>
+
+        <div class="summary">
+            <h2>RESUMEN DEL PRÉSTAMO</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Monto del préstamo</h3>
+                    <p>{{ prestamo.monto|floatformat:2 }} RD$</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total a pagar</h3>
+                    <p>{{ prestamo.total_pagar|floatformat:2 }} RD$</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Intereses totales</h3>
+                    <p>{{ prestamo.total_intereses|floatformat:2 }} RD$</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Pago por período</h3>
+                    <p>{{ prestamo.pago_periodico|floatformat:2 }} RD$</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>TABLA DE AMORTIZACIÓN</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Pago #</th>
+                    <th style="width: 28%;">Capital</th>
+                    <th style="width: 28%;">Total Pago</th>
+                    <th style="width: 29%;">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in tabla_amortizacion %}
+                <tr>
+                    <td>{{ pago.numero }}</td>
+                    <td>{{ pago.capital|floatformat:2 }} RD$</td>
+                    <td>{{ pago.total_pago|floatformat:2 }} RD$</td>
+                    <td>{{ pago.balance|floatformat:2 }} RD$</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if prestamo.observacion %}
+        <div class="observations">
+            <h2>OBSERVACIONES</h2>
+            <p>{{ prestamo.observacion }}</p>
+        </div>
+        {% endif %}
+
+        <div class="signature">
+            <div class="signature-line">FIRMA DEL CLIENTE</div>
+            <div class="signature-line">FIRMA DEL REPRESENTANTE</div>
+        </div>
+
+        <div class="footer">
+            <p>Sistema de Préstamos RD - Todos los derechos reservados © {{ fecha_actual|date:"Y" }}</p>
+            <p>Este documento es válido sin firma ni sello</p>
+        </div>
+    </div>
+
+    <div class="no-print">
+        <button class="print-btn" onclick="window.print()">Imprimir Factura</button>
+    </div>
+
+    <script>
+        // Auto-print when page loads (optional)
+        window.onload = function() {
+            // Descomenta esta línea si quieres que se abra automáticamente el diálogo de impresión
+            // setTimeout(function() { window.print(); }, 500);
+        };
+    </script>
+</body>
+</html>

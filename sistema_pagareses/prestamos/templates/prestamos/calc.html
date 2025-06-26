@@ -987,6 +987,363 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Control del menú móvil
+//     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+//     const sidebar = document.getElementById('sidebar');
+//     const overlay = document.getElementById('overlay');
+
+//     function toggleMenu() {
+//         sidebar.classList.toggle('active');
+//         overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+//         document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+//     }
+
+//     mobileMenuBtn.addEventListener('click', toggleMenu);
+//     overlay.addEventListener('click', toggleMenu);
+
+//     // Manejar cambios de tamaño de pantalla
+//     window.addEventListener('resize', function() {
+//         if (window.innerWidth > 992) {
+//             sidebar.classList.remove('active');
+//             overlay.style.display = 'none';
+//             document.body.style.overflow = 'auto';
+//         }
+//     });
+
+//     // Mostrar resultados si hay un préstamo cargado
+//     {% if prestamo %}
+//         document.getElementById('resultado').style.display = 'block';
+//         document.getElementById('tablaContainer').style.display = 'block';
+//     {% endif %}
+
+//     // Configurar eventos de búsqueda
+//     const searchInput = document.getElementById('searchInput');
+//     searchInput.addEventListener('input', debounce(buscador_cliente, 300));
+//     searchInput.addEventListener('keypress', function(e) {
+//         if (e.key === 'Enter') {
+//             buscador_cliente();
+//         }
+//     });
+
+//     // Configurar validación de cédula en tiempo real
+//     document.getElementById('cedula').addEventListener('input', function(e) {
+//         // Eliminar guiones automáticamente
+//         this.value = this.value.replace(/-/g, '');
+        
+//         // Validación visual
+//         if (this.value.length !== 11 || !/^\d+$/.test(this.value)) {
+//             this.style.borderColor = 'var(--danger)';
+//         } else {
+//             this.style.borderColor = '';
+//         }
+//     });
+
+//     // Configurar formato de monto
+//     document.getElementById('monto').addEventListener('input', formatCurrencyInput);
+// });
+
+// // Función para formatear entrada de moneda
+// function formatCurrencyInput(e) {
+//     let value = e.target.value.replace(/,/g, '');
+//     if(!isNaN(value) && value !== '') {
+//         e.target.value = parseFloat(value).toLocaleString('es-DO');
+//     }
+// }
+
+// // Función de formato RD
+// function formatoRD(numero) {
+//     return new Intl.NumberFormat('es-DO', {
+//         style: 'currency',
+//         currency: 'DOP',
+//         minimumFractionDigits: 2,
+//         maximumFractionDigits: 2
+//     }).format(numero);
+// }
+
+// // Función de formato RD para enteros
+// function formatoRDEnteros(numero) {
+//     return new Intl.NumberFormat('es-DO', {
+//         style: 'currency',
+//         currency: 'DOP',
+//         minimumFractionDigits: 0,
+//         maximumFractionDigits: 0
+//     }).format(Math.round(numero));
+// }
+
+// // Función para cerrar resultados de búsqueda
+// function cerrarResultados() {
+//     document.getElementById('searchResults').style.display = 'none';
+// }
+
+// // Función debounce para evitar múltiples llamadas
+// function debounce(func, wait) {
+//     let timeout;
+//     return function() {
+//         const context = this, args = arguments;
+//         clearTimeout(timeout);
+//         timeout = setTimeout(() => func.apply(context, args), wait);
+//     };
+// }
+
+// // Función para buscar clientes en el servidor
+// async function buscador_cliente() {
+//     const searchTerm = document.getElementById('searchInput').value.trim();
+//     const searchResults = document.getElementById('searchResults');
+//     const resultsList = document.getElementById('resultsList');
+    
+//     if (searchTerm.length < 2) {
+//         searchResults.style.display = 'none';
+//         return;
+//     }
+    
+//     try {
+//         // Mostrar indicador de carga
+//         resultsList.innerHTML = '<div class="no-results"><i class="fas fa-spinner fa-spin"></i><p>Buscando clientes...</p></div>';
+//         searchResults.style.display = 'block';
+        
+//         const response = await fetch(`/buscador-cliente/?q=${encodeURIComponent(searchTerm)}`);
+        
+//         if (!response.ok) {
+//             throw new Error(`Error HTTP: ${response.status}`);
+//         }
+        
+//         const clientes = await response.json();
+        
+//         resultsList.innerHTML = '';
+        
+//         if (clientes.length > 0) {
+//             clientes.forEach(cliente => {
+//                 const resultItem = document.createElement('div');
+//                 resultItem.className = 'result-item';
+//                 resultItem.innerHTML = `
+//                     <div class="client-info">
+//                         <div class="client-name">${cliente.nombres}</div>
+//                         <div class="client-cedula">Cédula: ${cliente.numero_identificacion}</div>
+//                         ${cliente.telefono ? `<div class="client-phone">Tel: ${cliente.telefono}</div>` : ''}
+//                     </div>
+//                     <button class="select-btn" onclick="seleccionarCliente('${cliente.numero_identificacion}', '${cliente.nombres.replace(/'/g, "\\'")}')">
+//                         <i class="fas fa-check"></i> Seleccionar
+//                     </button>
+//                 `;
+//                 resultsList.appendChild(resultItem);
+//             });
+//         } else {
+//             resultsList.innerHTML = `
+//                 <div class="no-results">
+//                     <i class="fas fa-user-slash"></i>
+//                     <p>No se encontraron clientes con ese criterio de búsqueda</p>
+//                 </div>
+//             `;
+//         }
+//     } catch (error) {
+//         console.error('Error al buscar clientes:', error);
+//         resultsList.innerHTML = `
+//             <div class="no-results">
+//                 <i class="fas fa-exclamation-triangle"></i>
+//                 <p>Error al buscar clientes. Intente nuevamente.</p>
+//             </div>
+//         `;
+//     }
+// }
+
+// // Función para seleccionar un cliente
+// function seleccionarCliente(cedula, nombre) {
+//     // Eliminar guiones si existen
+//     const cedulaLimpia = cedula.replace(/-/g, '');
+//     document.getElementById('cedula').value = cedulaLimpia;
+//     document.getElementById('nombre').value = nombre;
+//     cerrarResultados();
+//     mostrarNotificacion(`Cliente seleccionado: ${nombre}`);
+//     document.getElementById('tipoPrestamo').focus();
+// }
+
+// // Función para mostrar notificaciones
+// function mostrarNotificacion(mensaje, tipo = 'success') {
+//     const notificacion = document.createElement('div');
+//     notificacion.className = `notificacion notificacion-${tipo}`;
+//     notificacion.innerHTML = `
+//         <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+//         <span>${mensaje}</span>
+//     `;
+    
+//     document.body.appendChild(notificacion);
+    
+//     // Animación de entrada
+//     setTimeout(() => {
+//         notificacion.style.opacity = '1';
+//         notificacion.style.transform = 'translateY(0)';
+//     }, 10);
+    
+//     // Remover después de 3 segundos
+//     setTimeout(() => {
+//         notificacion.style.opacity = '0';
+//         notificacion.style.transform = 'translateY(-20px)';
+//         setTimeout(() => notificacion.remove(), 300);
+//     }, 3000);
+// }
+
+// // Función para calcular el préstamo
+// function calcularPrestamo() {
+//     // Obtener y validar valores
+//     const cedula = document.getElementById('cedula').value.trim();
+//     const nombre = document.getElementById('nombre').value.trim();
+//     const tipoPrestamo = document.getElementById('tipoPrestamo').value;
+//     const monto = parseFloat(document.getElementById('monto').value.replace(/,/g, '')) || 0;
+//     const tasaMensual = parseFloat(document.getElementById('tasa').value) / 100 || 0;
+//     const plazo = parseInt(document.getElementById('plazo').value) || 0;
+//     const frecuencia = parseInt(document.getElementById('frecuencia').value) || 0;
+//     const tasaMora = parseFloat(document.getElementById('tasaMora').value) || 0;
+
+//     // Validar cédula (11 dígitos)
+//     if (!/^\d{11}$/.test(cedula)) {
+//         mostrarNotificacion('Cédula inválida. Debe tener 11 dígitos', 'error');
+//         document.getElementById('cedula').focus();
+//         return;
+//     }
+
+//     // Validaciones generales
+//     if (!nombre || !tipoPrestamo) {
+//         mostrarNotificacion('Complete todos los campos de información del cliente', 'error');
+//         return;
+//     }
+
+//     if (!monto || monto <= 0 || !tasaMensual || tasaMensual <= 0 || !plazo || plazo < 1 || plazo > 12 || !frecuencia) {
+//         mostrarNotificacion('Complete todos los campos correctamente (Plazo 1-12 meses)', 'error');
+//         return;
+//     }
+
+//     // Cálculos con interés simple
+//     const totalPagos = plazo * frecuencia;
+//     const interesTotal = monto * tasaMensual * plazo;
+//     const totalPagar = monto + interesTotal;
+//     const pagoPorPeriodo = totalPagar / totalPagos;
+
+//     // Mostrar resultados
+//     document.getElementById('resultado').style.display = 'block';
+//     document.getElementById('montoResumen').textContent = formatoRD(monto);
+//     document.getElementById('total').textContent = formatoRD(totalPagar);
+//     document.getElementById('intereses').textContent = formatoRD(interesTotal);
+//     document.getElementById('pagoPeriodo').textContent = formatoRD(pagoPorPeriodo);
+
+//     // Generar tabla de amortización
+//     generarTablaAmortizacion(monto, tasaMensual, plazo, frecuencia);
+// }
+
+// // Función para generar la tabla de amortización
+// function generarTablaAmortizacion(monto, tasaMensual, plazo, frecuencia) {
+//     const cuerpoTabla = document.getElementById('cuerpoTabla');
+//     const tablaContainer = document.getElementById('tablaContainer');
+//     cuerpoTabla.innerHTML = '';
+//     tablaContainer.style.display = 'block';
+
+//     let saldo = monto;
+//     const totalPagos = plazo * frecuencia;
+//     const pagoCapital = monto / totalPagos;
+//     const interesPorPeriodo = (monto * tasaMensual) / frecuencia;
+
+//     for (let i = 1; i <= totalPagos; i++) {
+//         const totalPago = pagoCapital + interesPorPeriodo;
+//         saldo -= pagoCapital;
+
+//         const fila = document.createElement('tr');
+//         fila.innerHTML = `
+//             <td>${i}</td>
+//             <td>${formatoRDEnteros(pagoCapital)}</td>
+//             <td>${formatoRDEnteros(interesPorPeriodo)}</td>
+//             <td>${formatoRDEnteros(totalPago)}</td>
+//             <td>${formatoRDEnteros(saldo > 0 ? saldo : 0)}</td>
+//         `;
+
+//         cuerpoTabla.appendChild(fila);
+//     }
+// }
+
+// // Función para guardar la información del préstamo
+// function guardarInformacion() {
+//     // Validar que se haya calculado primero
+//     if (!document.getElementById('resultado').style.display || document.getElementById('resultado').style.display === 'none') {
+//         mostrarNotificacion('Debe calcular el préstamo antes de guardar', 'error');
+//         return;
+//     }
+    
+//     // Validar formulario completo
+//     const form = document.getElementById('formularioPrestamo');
+//     const requiredFields = form.querySelectorAll('[required]');
+//     let isValid = true;
+    
+//     requiredFields.forEach(field => {
+//         if (!field.value.trim()) {
+//             field.style.borderColor = 'var(--danger)';
+//             isValid = false;
+//         } else {
+//             field.style.borderColor = '';
+//         }
+//     });
+    
+//     // Validar cédula específicamente
+//     const cedula = document.getElementById('cedula').value.trim();
+//     if (!/^\d{11}$/.test(cedula)) {
+//         mostrarNotificacion('Cédula inválida. Debe tener 11 dígitos', 'error');
+//         document.getElementById('cedula').style.borderColor = 'var(--danger)';
+//         isValid = false;
+//     }
+    
+//     // Validar observación (opcional)
+//     const observacion = document.getElementById('observacion').value.trim();
+//     if (observacion.length > 500) {
+//         mostrarNotificacion('La observación no puede exceder los 500 caracteres', 'error');
+//         document.getElementById('observacion').style.borderColor = 'var(--danger)';
+//         isValid = false;
+//     }
+    
+//     if (!isValid) {
+//         mostrarNotificacion('Complete todos los campos obligatorios correctamente', 'error');
+//         return;
+//     }
+    
+//     // Enviar el formulario
+//     form.submit();
+// }
+
+// // Agregar CSS para notificaciones
+// const notificationCSS = `
+//     .notificacion {
+//         position: fixed;
+//         top: 20px;
+//         right: 20px;
+//         padding: 1rem 1.5rem;
+//         border-radius: 8px;
+//         box-shadow: var(--card-shadow);
+//         z-index: 1000;
+//         display: flex;
+//         align-items: center;
+//         gap: 0.75rem;
+//         opacity: 0;
+//         transform: translateY(-20px);
+//         transition: all 0.3s ease;
+//     }
+    
+//     .notificacion-success {
+//         background-color: var(--accent);
+//         color: white;
+//     }
+    
+//     .notificacion-error {
+//         background-color: var(--danger);
+//         color: white;
+//     }
+    
+//     .notificacion i {
+//         font-size: 1.2rem;
+//     }
+// `;
+
+// // Inyectar CSS al documento
+// const style = document.createElement('style');
+// style.textContent = notificationCSS;
+// document.head.appendChild(style);
+
 document.addEventListener('DOMContentLoaded', function() {
     // Control del menú móvil
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -1002,21 +1359,6 @@ document.addEventListener('DOMContentLoaded', function() {
     mobileMenuBtn.addEventListener('click', toggleMenu);
     overlay.addEventListener('click', toggleMenu);
 
-    // Manejar cambios de tamaño de pantalla
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 992) {
-            sidebar.classList.remove('active');
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    });
-
-    // Mostrar resultados si hay un préstamo cargado
-    {% if prestamo %}
-        document.getElementById('resultado').style.display = 'block';
-        document.getElementById('tablaContainer').style.display = 'block';
-    {% endif %}
-
     // Configurar eventos de búsqueda
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('input', debounce(buscador_cliente, 300));
@@ -1028,10 +1370,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Configurar validación de cédula en tiempo real
     document.getElementById('cedula').addEventListener('input', function(e) {
-        // Eliminar guiones automáticamente
         this.value = this.value.replace(/-/g, '');
-        
-        // Validación visual
         if (this.value.length !== 11 || !/^\d+$/.test(this.value)) {
             this.style.borderColor = 'var(--danger)';
         } else {
@@ -1041,6 +1380,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Configurar formato de monto
     document.getElementById('monto').addEventListener('input', formatCurrencyInput);
+    
+    // Validar formulario antes de enviar
+    document.getElementById('formularioPrestamo').addEventListener('submit', function(e) {
+        // Limpiar formato de monto
+        const montoInput = document.getElementById('monto');
+        montoInput.value = montoInput.value.replace(/,/g, '');
+        
+        // Validar que todos los campos requeridos estén completos
+        const requiredFields = this.querySelectorAll('[required]');
+        let allValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = 'var(--danger)';
+                allValid = false;
+            }
+        });
+        
+        if (!allValid) {
+            e.preventDefault();
+            mostrarNotificacion('Complete todos los campos obligatorios', 'error');
+        }
+    });
 });
 
 // Función para formatear entrada de moneda
@@ -1149,7 +1511,6 @@ async function buscador_cliente() {
 
 // Función para seleccionar un cliente
 function seleccionarCliente(cedula, nombre) {
-    // Eliminar guiones si existen
     const cedulaLimpia = cedula.replace(/-/g, '');
     document.getElementById('cedula').value = cedulaLimpia;
     document.getElementById('nombre').value = nombre;
@@ -1169,13 +1530,11 @@ function mostrarNotificacion(mensaje, tipo = 'success') {
     
     document.body.appendChild(notificacion);
     
-    // Animación de entrada
     setTimeout(() => {
         notificacion.style.opacity = '1';
         notificacion.style.transform = 'translateY(0)';
     }, 10);
     
-    // Remover después de 3 segundos
     setTimeout(() => {
         notificacion.style.opacity = '0';
         notificacion.style.transform = 'translateY(-20px)';
@@ -1262,7 +1621,8 @@ function generarTablaAmortizacion(monto, tasaMensual, plazo, frecuencia) {
 // Función para guardar la información del préstamo
 function guardarInformacion() {
     // Validar que se haya calculado primero
-    if (!document.getElementById('resultado').style.display || document.getElementById('resultado').style.display === 'none') {
+    if (!document.getElementById('resultado').style.display || 
+        document.getElementById('resultado').style.display === 'none') {
         mostrarNotificacion('Debe calcular el préstamo antes de guardar', 'error');
         return;
     }
@@ -1302,11 +1662,15 @@ function guardarInformacion() {
         return;
     }
     
+    // Asegurar formato correcto del monto antes de enviar
+    const montoInput = document.getElementById('monto');
+    montoInput.value = montoInput.value.replace(/,/g, '');
+    
     // Enviar el formulario
     form.submit();
 }
 
-// Agregar CSS para notificaciones
+// Inyectar CSS para notificaciones
 const notificationCSS = `
     .notificacion {
         position: fixed;
@@ -1339,7 +1703,7 @@ const notificationCSS = `
     }
 `;
 
-// Inyectar CSS al documento
+// Crear e inyectar el estilo
 const style = document.createElement('style');
 style.textContent = notificationCSS;
 document.head.appendChild(style);

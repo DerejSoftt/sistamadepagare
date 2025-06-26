@@ -1203,6 +1203,264 @@ def buscador_cliente(request):
 
 
 
+# @require_http_methods(["GET", "POST"])
+# def calc(request):
+#     if request.method == 'POST':
+#         try:
+#             # Obtener datos del formulario
+#             cedula = request.POST.get('cedula', '').strip()
+#             nombre = request.POST.get('nombre', '').strip()
+#             tipo_prestamo = request.POST.get('tipoPrestamo')
+#             monto_str = request.POST.get('monto', '0').replace(',', '')
+#             tasa_interes = request.POST.get('tasa')
+#             plazo_meses = request.POST.get('plazo')
+#             frecuencia_pagos = request.POST.get('frecuencia')
+#             tasa_mora = request.POST.get('tasaMora', '2.00')
+#             observacion = request.POST.get('observacion', '').strip()
+
+#             # Validaciones básicas
+#             if not all([cedula, nombre, tipo_prestamo, monto_str, tasa_interes, plazo_meses, frecuencia_pagos]):
+#                 messages.error(request, 'Todos los campos obligatorios deben ser completados')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#             # Validar formato de cédula (11 dígitos sin guiones)
+#             if not re.match(r'^\d{11}$', cedula):
+#                 messages.error(request, 'Formato de cédula inválido. Debe tener 11 dígitos')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#             # Convertir y validar montos numéricos
+#             try:
+#                 monto = Decimal(monto_str)
+#                 tasa_interes = Decimal(tasa_interes)
+#                 plazo_meses = int(plazo_meses)
+#                 frecuencia_pagos = int(frecuencia_pagos)
+#                 tasa_mora = Decimal(tasa_mora)
+#             except (ValueError, TypeError):
+#                 messages.error(request, 'Valores numéricos inválidos')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#             # Validar rangos
+#             if not (1 <= plazo_meses <= 12):
+#                 messages.error(request, 'El plazo debe estar entre 1 y 12 meses')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#             if not (0 < tasa_interes <= 100):
+#                 messages.error(request, 'La tasa de interés debe estar entre 0.01% y 100%')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#             # Validar longitud de observación
+#             if len(observacion) > 500:
+#                 messages.error(request, 'La observación no puede exceder los 500 caracteres')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#             # Buscar cliente existente por número de identificación
+#             cliente = None
+#             try:
+#                 with transaction.atomic():
+#                     cliente = Cliente.objects.get(numero_identificacion=cedula)
+#                     # Actualizar nombre si es diferente
+#                     nombre_completo_cliente = f"{cliente.nombres} {cliente.apellidos}".strip()
+#                     if nombre.upper() != nombre_completo_cliente.upper():
+#                         messages.info(request, f'Cliente encontrado: {nombre_completo_cliente}')
+#             except Cliente.DoesNotExist:
+#                 # Si no existe el cliente, crearlo
+#                 try:
+#                     with transaction.atomic():
+#                         # Separar nombre y apellidos (asumiendo que el primer nombre es nombre y el resto apellidos)
+#                         partes_nombre = nombre.split()
+#                         if len(partes_nombre) >= 2:
+#                             nombres = partes_nombre[0]
+#                             apellidos = ' '.join(partes_nombre[1:])
+#                         else:
+#                             nombres = nombre
+#                             apellidos = ''
+
+#                         cliente = Cliente.objects.create(
+#                             numero_identificacion=cedula,
+#                             nombres=nombres,
+#                             apellidos=apellidos,
+#                             telefono='',  # Campo opcional
+#                             direccion='',  # Campo opcional
+#                             fecha_nacimiento=None,  # Campo opcional
+#                             estado_civil='',  # Campo opcional
+#                             ocupacion='',  # Campo opcional
+#                             ingresos_mensuales=0,  # Campo opcional
+#                             referencia_personal='',  # Campo opcional
+#                             telefono_referencia=''  # Campo opcional
+#                         )
+#                         messages.success(request, f'Nuevo cliente registrado: {nombre}')
+#                 except Exception as e:
+#                     messages.error(request, f'Error al crear cliente: {str(e)}')
+#                     return render(request, 'prestamos/calc.html', {
+#                         'form_data': {
+#                             'cedula': cedula,
+#                             'nombre': nombre,
+#                             'tipoPrestamo': tipo_prestamo,
+#                             'monto': monto_str,
+#                             'tasa': tasa_interes,
+#                             'plazo': plazo_meses,
+#                             'frecuencia': frecuencia_pagos,
+#                             'tasaMora': tasa_mora,
+#                             'observacion': observacion
+#                         }
+#                     })
+
+#             # Crear el préstamo
+#             try:
+#                 with transaction.atomic():
+#                     prestamo = OtroPrestamo(
+#                         cliente=cliente,
+#                         tipo_prestamo=tipo_prestamo,
+#                         monto=monto,
+#                         tasa_interes=tasa_interes,
+#                         plazo_meses=plazo_meses,
+#                         frecuencia_pagos=frecuencia_pagos,
+#                         tasa_mora=tasa_mora,
+#                         observacion=observacion if observacion else None
+#                     )
+
+#                     # El método save() calculará automáticamente los campos restantes
+#                     prestamo.save()
+
+#                     # Mensaje de éxito
+#                     messages.success(request, f'Préstamo de {prestamo.get_tipo_prestamo_display()} creado exitosamente')
+                    
+#                     # Preparar contexto con el préstamo creado
+#                     context = {
+#                         'prestamo': prestamo,
+#                         'tabla_amortizacion': prestamo.generar_tabla_amortizacion(),
+#                         'form_data': {
+#                             'cedula': cedula,
+#                             'nombre': nombre,
+#                             'tipoPrestamo': tipo_prestamo,
+#                             'monto': monto_str,
+#                             'tasa': tasa_interes,
+#                             'plazo': plazo_meses,
+#                             'frecuencia': frecuencia_pagos,
+#                             'tasaMora': tasa_mora,
+#                             'observacion': observacion
+#                         }
+#                     }
+#                     return render(request, 'prestamos/calc.html', context)
+
+#             except Exception as e:
+#                 messages.error(request, f'Error al crear el préstamo: {str(e)}')
+#                 return render(request, 'prestamos/calc.html', {
+#                     'form_data': {
+#                         'cedula': cedula,
+#                         'nombre': nombre,
+#                         'tipoPrestamo': tipo_prestamo,
+#                         'monto': monto_str,
+#                         'tasa': tasa_interes,
+#                         'plazo': plazo_meses,
+#                         'frecuencia': frecuencia_pagos,
+#                         'tasaMora': tasa_mora,
+#                         'observacion': observacion
+#                     }
+#                 })
+
+#         except Exception as e:
+#             messages.error(request, f'Error inesperado: {str(e)}')
+#             return render(request, 'prestamos/calc.html', {
+#                 'form_data': {
+#                     'cedula': request.POST.get('cedula', ''),
+#                     'nombre': request.POST.get('nombre', ''),
+#                     'tipoPrestamo': request.POST.get('tipoPrestamo', ''),
+#                     'monto': request.POST.get('monto', ''),
+#                     'tasa': request.POST.get('tasa', ''),
+#                     'plazo': request.POST.get('plazo', ''),
+#                     'frecuencia': request.POST.get('frecuencia', ''),
+#                     'tasaMora': request.POST.get('tasaMora', '2.00'),
+#                     'observacion': request.POST.get('observacion', '')
+#                 }
+#             })
+
+#     # Si es GET, mostrar el formulario vacío
+#     return render(request, 'prestamos/calc.html')
+
+
+
+
+
+
+
+
+#prestamos
+
+
+
 @require_http_methods(["GET", "POST"])
 def calc(request):
     if request.method == 'POST':
@@ -1338,7 +1596,7 @@ def calc(request):
                 # Si no existe el cliente, crearlo
                 try:
                     with transaction.atomic():
-                        # Separar nombre y apellidos (asumiendo que el primer nombre es nombre y el resto apellidos)
+                        # Separar nombre y apellidos
                         partes_nombre = nombre.split()
                         if len(partes_nombre) >= 2:
                             nombres = partes_nombre[0]
@@ -1351,14 +1609,14 @@ def calc(request):
                             numero_identificacion=cedula,
                             nombres=nombres,
                             apellidos=apellidos,
-                            telefono='',  # Campo opcional
-                            direccion='',  # Campo opcional
-                            fecha_nacimiento=None,  # Campo opcional
-                            estado_civil='',  # Campo opcional
-                            ocupacion='',  # Campo opcional
-                            ingresos_mensuales=0,  # Campo opcional
-                            referencia_personal='',  # Campo opcional
-                            telefono_referencia=''  # Campo opcional
+                            telefono='',
+                            direccion='',
+                            fecha_nacimiento=None,
+                            estado_civil='',
+                            ocupacion='',
+                            ingresos_mensuales=0,
+                            referencia_personal='',
+                            telefono_referencia=''
                         )
                         messages.success(request, f'Nuevo cliente registrado: {nombre}')
                 except Exception as e:
@@ -1391,29 +1649,14 @@ def calc(request):
                         observacion=observacion if observacion else None
                     )
 
-                    # El método save() calculará automáticamente los campos restantes
+                    # Guardar el préstamo
                     prestamo.save()
 
                     # Mensaje de éxito
                     messages.success(request, f'Préstamo de {prestamo.get_tipo_prestamo_display()} creado exitosamente')
                     
-                    # Preparar contexto con el préstamo creado
-                    context = {
-                        'prestamo': prestamo,
-                        'tabla_amortizacion': prestamo.generar_tabla_amortizacion(),
-                        'form_data': {
-                            'cedula': cedula,
-                            'nombre': nombre,
-                            'tipoPrestamo': tipo_prestamo,
-                            'monto': monto_str,
-                            'tasa': tasa_interes,
-                            'plazo': plazo_meses,
-                            'frecuencia': frecuencia_pagos,
-                            'tasaMora': tasa_mora,
-                            'observacion': observacion
-                        }
-                    }
-                    return render(request, 'prestamos/calc.html', context)
+                    # Redirigir a la página de factura del préstamo
+                    return redirect('facturadeprestamos', prestamo_id=prestamo.id)
 
             except Exception as e:
                 messages.error(request, f'Error al crear el préstamo: {str(e)}')
@@ -1449,3 +1692,25 @@ def calc(request):
 
     # Si es GET, mostrar el formulario vacío
     return render(request, 'prestamos/calc.html')
+
+
+
+
+
+def facturadeprestamos(request, prestamo_id):
+    # Get the loan object or return 404 if not found
+    prestamo = get_object_or_404(OtroPrestamo, pk=prestamo_id)
+    
+    # Generate amortization table
+    tabla_amortizacion = prestamo.generar_tabla_amortizacion()
+    
+    # Current date for the invoice
+    fecha_actual = datetime.now()
+    
+    context = {
+        'prestamo': prestamo,
+        'tabla_amortizacion': tabla_amortizacion,
+        'fecha_actual': fecha_actual,
+    }
+    
+    return render(request, 'prestamos/facturadeprestamos.html', context)
