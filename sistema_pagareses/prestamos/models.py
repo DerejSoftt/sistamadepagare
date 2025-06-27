@@ -71,6 +71,9 @@ class Prestamo(models.Model):
     DEPARTAMENTO_CHOICES = [
         ('ayuntamiento', 'Ayuntamiento'),
         ('ferquido', 'Ferquido'),
+        ('choga', 'Choga'),
+        ('financiamiento', 'Financiamiento'),
+        ('personal', 'Personal'),
     ]
     
     cliente = models.ForeignKey('Cliente', on_delete=models.PROTECT)
