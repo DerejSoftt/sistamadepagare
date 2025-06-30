@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | Sistema de Préstamos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="{% static "prestamos/logo.png" %}" type="image/x-icon">
     <style>
         :root {
             --primary: #2563eb;
@@ -195,7 +198,7 @@
 <body>
     <div class="login-container">
         <div class="logo">
-            <img src="https://via.placeholder.com/70x70/2563eb/ffffff?text=SP" alt="Logo Sistema Préstamos">
+            <img src="{% static "prestamos/logo.png" %}" alt="Logo Sistema Préstamos">
             <h1>Sistema Préstamos</h1>
             <p>Acceso al panel administrativo</p>
         </div>
