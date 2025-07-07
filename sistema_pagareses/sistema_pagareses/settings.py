@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-8ilu=*!1(r^=c4mbqo=_g#kz@+wsh-ef=x1khvp$egox^686of
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '192.168.0.100',
+    'localhost', 
+    '127.0.0.1'
+]
+
 
 
 # Application definition
@@ -42,6 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,20 +74,23 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sistema_pagareses.wsgi.application'
+# WSGI_APPLICATION STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'= 'sistema_pagareses.wsgi.application'
 
+
+
+WSGI_APPLICATION = 'sistema_pagareses.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "financiera",
-        "USER": "root",
-        "PASSWORD": "",
-        "HOST": "localhost",
-        "PORT": "3306",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'financiera',       # Nombre de tu BD
+        'USER': 'root',             # Usuario MySQL
+        'PASSWORD': 'Almagedon666@',    # Contraseña que estableciste
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         }
@@ -112,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -122,14 +131,23 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+# Ruta donde se recolectarán los archivos estáticos para producción
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # For production
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'prestamos/static'),  # Your app's static directory
+]
 
-STATIC_URL = 'static/'
+
+
+
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+

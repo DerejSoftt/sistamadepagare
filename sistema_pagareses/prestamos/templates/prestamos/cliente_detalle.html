@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de Cliente - Préstamos Fácil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-      <link rel="shortcut icon" href="{% static "prestamos/logo.png" %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static "prestamos/logo.png" %}" type="image/x-icon">
     <style>
         :root {
             --primary: #2563eb;
@@ -648,71 +648,6 @@
             animation: fadeIn 0.3s ease-out forwards;
         }
 
-        /* Estilos para impresión en impresora térmica */
-        @media print {
-            body * {
-                visibility: hidden;
-                margin: 0;
-                padding: 0;
-            }
-            
-            .receipt, .receipt * {
-                visibility: visible;
-                font-family: 'Courier New', monospace !important;
-                font-size: 12px !important;
-                line-height: 1.2 !important;
-            }
-            
-            .receipt {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 80mm !important;
-                height: auto;
-                margin: 0 !important;
-                padding: 5px 10px !important;
-                box-shadow: none !important;
-                border: none !important;
-                page-break-after: always;
-            }
-            
-            .receipt-header {
-                text-align: center;
-                margin-bottom: 10px !important;
-                padding-bottom: 10px !important;
-                border-bottom: 1px dashed #000 !important;
-            }
-            
-            .receipt-title {
-                font-size: 14px !important;
-                margin-bottom: 5px !important;
-            }
-            
-            .receipt-details {
-                margin: 10px 0 !important;
-            }
-            
-            .receipt-row {
-                margin-bottom: 5px !important;
-            }
-            
-            .receipt-total {
-                font-size: 14px !important;
-                margin-top: 10px !important;
-                padding-top: 10px !important;
-                border-top: 1px dashed #000 !important;
-            }
-            
-            .receipt-actions {
-                display: none !important;
-            }
-            
-            @page {
-                size: 80mm auto;
-                margin: 0;
-            }
-        }
-
         /* Formato de números con comas */
         .number-format {
             font-variant-numeric: tabular-nums;
@@ -1108,7 +1043,7 @@
                         </form>
                     </div>
                     
-                    <!-- Recibo térmico para impresión -->
+                    <!-- Recibo térmico para visualización -->
                     <div class="receipt" id="receipt" style="display: none;">
                         <div class="thermal-receipt">
                             <div class="thermal-header">PRÉSTAMOS FÁCIL</div>
@@ -1275,7 +1210,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show receipt with thermal style
+                    // Show receipt information
                     document.getElementById('thermal-recibo-numero').textContent = data.recibo;
                     document.getElementById('thermal-recibo-fecha').textContent = data.fecha;
                     document.getElementById('thermal-recibo-prestamo').textContent = prestamoText;
@@ -1288,10 +1223,22 @@
                     document.getElementById('paymentForm').style.display = 'none';
                     document.getElementById('receipt').style.display = 'block';
                     
-                    // Auto-print receipt
-                    setTimeout(() => {
-                        window.print();
-                    }, 500);
+                    // Download PDF automatically
+                    if (data.pdf) {
+                        const pdfBytes = new Uint8Array(
+                            data.pdf.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
+                        );
+                        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `recibo_${data.recibo}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
                     
                     // Refresh page after 3 seconds to show updated data
                     setTimeout(() => {
@@ -1307,9 +1254,21 @@
             });
         });
 
-        // Print receipt
+        // Print receipt (now downloads PDF again)
         document.getElementById('printReceipt').addEventListener('click', function() {
-            window.print();
+            const pdfBytes = new Uint8Array(
+                data.pdf.match(/.{1,2}/g).map(byte => parseInt(byte, 16))
+            );
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `recibo_${data.recibo}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
         // New payment button
@@ -1347,3 +1306,4 @@
     </script>
 </body>
 </html>
+

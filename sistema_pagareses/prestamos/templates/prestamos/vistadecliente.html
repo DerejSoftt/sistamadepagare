@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Cliente | Sistema de Préstamos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: white;
+            color: var(--dark);
+            padding: 1.5rem 1rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            transition: var(--transition);
+            overflow-y: auto;
+            border-right: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            min-width: 0;
+            width: calc(100% - 280px);
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            color: var(--gray);
+            font-size: clamp(0.9rem, 2vw, 1.05rem);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Contenedor principal */
+        .main-container {
+            background: white;
+            border-radius: 12px;
+            padding: clamp(1.5rem, 3vw, 2.5rem);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--light-gray);
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .container-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .container-header i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-right: 1rem;
+        }
+
+        .container-header h2 {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--dark);
+        }
+
+        /* Controles */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 250px;
+            max-width: 500px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            min-width: 0;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--light-gray);
+            color: var(--gray);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-success {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0ca678;
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        .controls-right {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Tabla */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .data-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            color: var(--gray);
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid var(--light-gray);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid var(--light-gray);
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: rgba(248, 250, 252, 0.5);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit:hover {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+
+        .btn-delete:hover {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--light-gray);
+        }
+
+        /* Footer */
+        .table-footer {
+            padding: 1.5rem;
+            background-color: #f8fafc;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-totals {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .total-item {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .total-value {
+            font-weight: bold;
+        }
+
+        .total-filtered {
+            color: var(--accent);
+        }
+
+        .total-general {
+            color: var(--primary);
+        }
+
+        /* Menú móvil */
+        .mobile-menu-btn {
+            display: none;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 101;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .select-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+                min-width: 280px;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+                padding-top: 4rem;
+            }
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-container {
+                width: 100%;
+                max-width: none;
+            }
+            .controls-right {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            .actions-cell {
+                flex-direction: column;
+            }
+            .btn-sm {
+                width: 100%;
+                justify-content: center;
+            }
+            .footer-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .footer-totals {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .modal-content {
+                width: 95%;
+            }
+            .form-row {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 0.75rem;
+                padding-top: 4rem;
+            }
+            .main-container {
+                padding: 0.75rem;
+            }
+            .data-table {
+                min-width: 600px;
+            }
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
+            .modal-header {
+                padding: 1rem;
+            }
+            .modal-body, .modal-footer {
+                padding: 1rem;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Scroll personalizado */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de menú móvil -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para menú móvil -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Sistema Préstamos</h2>
+        </div>
+        <nav aria-label="Main navigation">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'formulario' %}" class="nav-link " >
+                        <i class="fas fa-user-plus"></i>
+                        <span>Registrar Cliente</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'clientes' %}" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Perfil del Cliente</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'despacho' %}" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Iniciar prestamo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'registrodepago' %}" class="nav-link">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Préstamos y Abonos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'prestamospagados' %}" class="nav-link">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Préstamos Pagados</span>
+                    </a>
+
+
+                </li><li class="nav-item">
+                    <a href="#" class="nav-link active" aria-current="page">
+                        <i class="fas fa-edit"></i> 
+                        <span>Editar Cliente</span>
+                    </a>
+                </li>
+
+
+
+                <li class="nav-item">
+                    <a href="{% url 'anulacion' %}" class="nav-link">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Anulaciones de facturas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'anulacionderesivo' %}" class="nav-link">
+                        <i class="fas fa-ban"></i>
+                        <span>Anulaciones recibos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'reimprimir' %}" class="nav-link">
+                        <i class="fas fa-print"></i>
+                        <span>rimprimir factura</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'reporte' %}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>reportes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'index' %}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content" id="mainContent">
+        <!-- Header de página -->
+        <header class="page-header animate-fade">
+            <h1>Registrar Cliente</h1>
+            <p>Registro y gestión de clientes con información personal y departamental</p>
+        </header>
+
+        <div class="main-container animate-fade">
+            <div class="container-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Registro de Clientes</h2>
+            </div>
+
+            <!-- Controles de búsqueda -->
+            <div class="controls">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Buscar por cédula, nombre o departamento...">
+                    <button class="btn btn-primary btn-icon" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="controls-right">
+                    <button class="btn btn-outline" id="expandAllBtn">
+                        <i class="fas fa-expand-alt"></i> Expandir Todo
+                    </button>
+                    <button class="btn btn-success" id="printBtn">
+                        <i class="fas fa-print"></i> Imprimir Lista
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-container">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Cédula</th>
+                            <th>Nombre</th>
+                            <th>Departamento</th>
+                            <th>Total de Monto</th>
+                            <th style="text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Los datos se cargarán aquí con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Estado vacío -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-users"></i>
+                <h3>No se encontraron empleados</h3>
+                <p id="emptyMessage">Agrega empleados para comenzar</p>
+            </div>
+
+            <!-- Footer con totales -->
+            <div class="table-footer">
+                <div class="footer-info">
+                    <p id="recordCount">Mostrando 0 de 0 empleados</p>
+                    <div class="footer-totals">
+                        <div class="total-item">
+                            <span>Total filtrado:</span>
+                            <span class="total-value total-filtered" id="totalFiltered">RD$ 0.00</span>
+                        </div>
+                        <div class="total-item">
+                            <span>Total general:</span>
+                            <span class="total-value total-general" id="totalGeneral">RD$ 0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para editar cliente -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Cliente</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editNombres" class="form-label">Nombres</label>
+                                <input type="text" id="editNombres" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editApellidos" class="form-label">Apellidos</label>
+                                <input type="text" id="editApellidos" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editCedula" class="form-label">Cédula</label>
+                                <input type="text" id="editCedula" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editGenero" class="form-label">Género</label>
+                                <select id="editGenero" class="form-control select-control" required>
+                                    <option value="male">Masculino</option>
+                                    <option value="female">Femenino</option>
+                                    <option value="other">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editTelefono" class="form-label">Teléfono Principal</label>
+                                <input type="text" id="editTelefono" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editTelefonoSecundario" class="form-label">Teléfono Secundario</label>
+                                <input type="text" id="editTelefonoSecundario" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editDireccion" class="form-label">Dirección</label>
+                        <input type="text" id="editDireccion" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editCiudad" class="form-label">Ciudad</label>
+                                <input type="text" id="editCiudad" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editProvincia" class="form-label">Provincia</label>
+                                <select id="editProvincia" class="form-control select-control" required>
+                                    <option value="DN">Distrito Nacional</option>
+                                    <option value="SD">Santo Domingo</option>
+                                    <option value="SDE">Santo Domingo Este</option>
+                                    <option value="SA">Santiago</option>
+                                    <option value="PU">Puerto Plata</option>
+                                    <option value="LA">La Altagracia</option>
+                                    <option value="VE">La Vega</option>
+                                    <option value="SP">San Pedro de Macorís</option>
+                                    <option value="SC">San Cristóbal</option>
+                                    <option value="HR">Hermanas Mirabal</option>
+                                    <option value="MC">Montecristi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editTipoCuenta" class="form-label">Tipo de Cuenta</label>
+                                <select id="editTipoCuenta" class="form-control select-control" required>
+                                    <option value="corriente">Corriente</option>
+                                    <option value="ahorro">Ahorro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editIngresos" class="form-label">Ingresos Mensuales (RD$)</label>
+                                <input type="number" id="editIngresos" class="form-control" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editEmpleador" class="form-label">Empleador</label>
+                                <input type="text" id="editEmpleador" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editTelefonoLaboral" class="form-label">Teléfono Laboral</label>
+                                <input type="text" id="editTelefonoLaboral" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editBanco" class="form-label">Banco Principal</label>
+                                <input type="text" id="editBanco" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="editNumeroCuenta" class="form-label">Número de Cuenta</label>
+                                <input type="text" id="editNumeroCuenta" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelEdit">Cancelar</button>
+                <button class="btn btn-primary" id="saveChanges">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+    
+
+
+    <script type="application/json" id="clients-data">
+       {{ clientes_json|safe }}
+    </script>
+
+
+
+    <script >
+        // Elementos del DOM
+     // Elementos del DOM
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const tableBody = document.getElementById('tableBody');
+const emptyState = document.getElementById('emptyState');
+const recordCount = document.getElementById('recordCount');
+const totalFiltered = document.getElementById('totalFiltered');
+const totalGeneral = document.getElementById('totalGeneral');
+const printBtn = document.getElementById('printBtn');
+
+// Elementos del modal
+const editModal = document.getElementById('editModal');
+const modalClose = document.getElementById('modalClose');
+const cancelEdit = document.getElementById('cancelEdit');
+const saveChanges = document.getElementById('saveChanges');
+const editForm = document.getElementById('editForm');
+
+// Datos de los clientes
+let clients = [];
+let filteredClients = [];
+
+// Función para obtener el token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Función para cargar los datos iniciales
+function loadData() {
+    try {
+        // Obtener los datos de los clientes desde el script embebido
+        const clientsData = document.getElementById('clients-data');
+        if (clientsData && clientsData.textContent) {
+            clients = JSON.parse(clientsData.textContent);
+            filteredClients = [...clients];
+            renderTable();
+        } else {
+            showError('No se encontraron datos de clientes');
+        }
+    } catch (error) {
+        console.error('Error al cargar datos:', error);
+        showError('Error al cargar los datos de clientes');
+    }
+}
+
+// Función para formatear moneda
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('es-DO', {
+        style: 'currency',
+        currency: 'DOP',
+        minimumFractionDigits: 2
+    }).format(amount).replace('DOP', 'RD$');
+}
+
+// Función para obtener el nombre de la provincia
+function getProvinceName(code) {
+    const provinces = {
+        'DN': 'Distrito Nacional',
+        'SD': 'Santo Domingo',
+        'SDE': 'Santo Domingo Este',
+        'SA': 'Santiago',
+        'PU': 'Puerto Plata',
+        'LA': 'La Altagracia',
+        'VE': 'La Vega',
+        'SP': 'San Pedro de Macorís',
+        'SC': 'San Cristóbal',
+        'HR': 'Hermanas Mirabal',
+        'MC': 'Montecristi'
+    };
+    return provinces[code] || code;
+}
+
+// Función para renderizar la tabla
+function renderTable() {
+    if (filteredClients.length === 0) {
+        tableBody.innerHTML = '';
+        emptyState.style.display = 'block';
+        document.querySelector('.table-container').style.display = 'none';
+        document.querySelector('.table-footer').style.display = 'none';
+        
+        const emptyMessage = document.getElementById('emptyMessage');
+        emptyMessage.textContent = searchInput.value ? 
+            'No se encontraron clientes con esos criterios' : 
+            'No hay clientes registrados';
+        return;
+    }
+    
+    emptyState.style.display = 'none';
+    document.querySelector('.table-container').style.display = 'block';
+    document.querySelector('.table-footer').style.display = 'block';
+    
+    tableBody.innerHTML = filteredClients.map(client => `
+        <tr>
+            <td><code>${client.numero_identificacion}</code></td>
+            <td><strong>${client.nombres} ${client.apellidos}</strong></td>
+            <td><span class="badge">${client.ciudad}, ${getProvinceName(client.provincia)}</span></td>
+            <td><strong>${formatCurrency(client.total_monto)}</strong></td>
+            <td>
+                <div class="actions-cell">
+                    <button class="btn btn-outline btn-sm btn-edit" onclick="editClient(${client.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn btn-outline btn-sm btn-delete" onclick="deleteClient(${client.id})">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    updateFooter();
+}
+
+// Función para actualizar el footer con los totales
+function updateFooter() {
+    const totalFilteredAmount = filteredClients.reduce((sum, client) => sum + (client.total_monto || 0), 0);
+    const totalGeneralAmount = clients.reduce((sum, client) => sum + (client.total_monto || 0), 0);
+    
+    recordCount.textContent = `Mostrando ${filteredClients.length} de ${clients.length} clientes`;
+    totalFiltered.textContent = formatCurrency(totalFilteredAmount);
+    totalGeneral.textContent = formatCurrency(totalGeneralAmount);
+}
+
+// Función para buscar clientes
+function searchClients() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    filteredClients = clients.filter(client => 
+        (client.numero_identificacion && client.numero_identificacion.toLowerCase().includes(searchTerm)) ||
+        (client.nombres && `${client.nombres} ${client.apellidos}`.toLowerCase().includes(searchTerm)) ||
+        (client.ciudad && client.ciudad.toLowerCase().includes(searchTerm)) ||
+        (client.provincia && getProvinceName(client.provincia).toLowerCase().includes(searchTerm))
+    );
+    
+    renderTable();
+}
+
+// Función para editar un cliente
+async function editClient(id) {
+    const client = clients.find(c => c.id === id);
+    if (!client) return;
+    
+    // Llenar el formulario con los datos del cliente
+    document.getElementById('editId').value = client.id;
+    document.getElementById('editNombres').value = client.nombres;
+    document.getElementById('editApellidos').value = client.apellidos;
+    document.getElementById('editCedula').value = client.numero_identificacion;
+    document.getElementById('editGenero').value = client.genero;
+    document.getElementById('editTelefono').value = client.telefono_principal;
+    document.getElementById('editTelefonoSecundario').value = client.telefono_secundario || '';
+    document.getElementById('editDireccion').value = client.direccion;
+    document.getElementById('editCiudad').value = client.ciudad;
+    document.getElementById('editProvincia').value = client.provincia;
+    document.getElementById('editTipoCuenta').value = client.tipo_cuenta;
+    document.getElementById('editIngresos').value = client.ingresos_mensuales;
+    document.getElementById('editEmpleador').value = client.empleador || '';
+    document.getElementById('editTelefonoLaboral').value = client.telefono_laboral || '';
+    document.getElementById('editBanco').value = client.banco_principal || '';
+    document.getElementById('editNumeroCuenta').value = client.numero_cuenta || '';
+    
+    // Mostrar el modal
+    editModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+// Función para guardar los cambios del cliente
+async function saveClientChanges() {
+    const clientId = document.getElementById('editId').value;
+    const clientData = {
+        id: clientId,
+        nombres: document.getElementById('editNombres').value,
+        apellidos: document.getElementById('editApellidos').value,
+        numero_identificacion: document.getElementById('editCedula').value,
+        genero: document.getElementById('editGenero').value,
+        telefono_principal: document.getElementById('editTelefono').value,
+        telefono_secundario: document.getElementById('editTelefonoSecundario').value || null,
+        direccion: document.getElementById('editDireccion').value,
+        ciudad: document.getElementById('editCiudad').value,
+        provincia: document.getElementById('editProvincia').value,
+        tipo_cuenta: document.getElementById('editTipoCuenta').value,
+        ingresos_mensuales: parseFloat(document.getElementById('editIngresos').value),
+        empleador: document.getElementById('editEmpleador').value || null,
+        telefono_laboral: document.getElementById('editTelefonoLaboral').value || null,
+        banco_principal: document.getElementById('editBanco').value || null,
+        numero_cuenta: document.getElementById('editNumeroCuenta').value || null
+    };
+    
+    try {
+        const response = await fetch('clientes/editar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(clientData)
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message);
+        }
+        
+        // Recargar los datos
+        await loadData();
+        
+        // Cerrar el modal
+        editModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        showSuccess(result.message);
+    } catch (error) {
+        console.error('Error:', error);
+        showError('Error al actualizar el cliente: ' + error.message);
+    }
+}
+
+// Función para eliminar un cliente
+async function deleteClient(id) {
+    if (!confirm('¿Está seguro de eliminar este cliente y todo su historial de préstamos?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('clientes/eliminar/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ id: id })
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message);
+        }
+        
+        // Recargar los datos
+        await loadData();
+        
+        showSuccess(result.message);
+    } catch (error) {
+        console.error('Error:', error);
+        showError('Error al eliminar el cliente: ' + error.message);
+    }
+}
+
+// Función para mostrar mensajes de éxito
+function showSuccess(message) {
+    // Puedes implementar un sistema de notificaciones más elegante aquí
+    alert(message);
+}
+
+// Función para mostrar mensajes de error
+function showError(message) {
+    // Puedes implementar un sistema de notificaciones más elegante aquí
+    alert(message);
+}
+
+// Función para alternar menú móvil
+function toggleMenu() {
+    sidebar.classList.toggle('active');
+    overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+}
+
+// Event listeners
+mobileMenuBtn.addEventListener('click', toggleMenu);
+overlay.addEventListener('click', toggleMenu);
+
+searchInput.addEventListener('input', searchClients);
+searchInput.addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        searchClients();
+    }
+});
+
+searchBtn.addEventListener('click', searchClients);
+
+printBtn.addEventListener('click', function() {
+    window.print();
+});
+
+// Eventos del modal
+modalClose.addEventListener('click', function() {
+    editModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+cancelEdit.addEventListener('click', function() {
+    editModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+saveChanges.addEventListener('click', saveClientChanges);
+
+// Cerrar modal al hacer clic fuera del contenido
+editModal.addEventListener('click', function(e) {
+    if (e.target === editModal) {
+        editModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// Manejar cambios de tamaño de pantalla
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 992) {
+        sidebar.classList.remove('active');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// Inicializar la tabla al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    loadData();
+});
+    </script>
+</body>
+</html>

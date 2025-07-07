@@ -34,8 +34,13 @@ urlpatterns = [
     path('search_receipts/', views.search_receipts, name='search_receipts'),
     # path('cancel_receipt/', views.cancel_receipt, name='cancel_receipt'),
     path('debug_receipts/', views.debug_receipts, name='debug_receipts'),
-    
     path('anular_recibo/', views.anular_recibo, name='anular_recibo'),
+    path('vistadecliente', views.vistadecliente, name='vistadecliente'),
+    path('clientes/editar/', views.editar_cliente, name='editar_cliente'),
+    path('clientes/eliminar/', views.eliminar_cliente, name='eliminar_cliente'),
+    path('clientes/total-prestamos/', views.obtener_total_prestamos, name='total_prestamos'),
+
+
 ]
 
 

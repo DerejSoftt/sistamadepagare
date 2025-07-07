@@ -43,6 +43,23 @@ from django.db.models.functions import ExtractMonth, ExtractYear, Concat
 from django.db import models
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import login_required
+from django.core import serializers
+
+
+
+
+
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import mm
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+
+
+
+
 
 @login_required
 def formulario(request):
@@ -265,10 +282,123 @@ def cliente_detalle(request, cliente_id):
     
     return render(request, "prestamos/cliente_detalle.html", context)
 
+# def registrar_pago(request):
+#     if request.method == 'POST':
+#         try:
+#             # Obtener datos del formulario
+#             cliente_id = request.POST.get('cliente_id')
+#             prestamo_id = request.POST.get('prestamo_id')
+#             monto = Decimal(request.POST.get('monto'))
+#             fecha_pago = request.POST.get('fecha_pago')
+#             metodo_pago = request.POST.get('metodo_pago')
+#             tipo_pago = request.POST.get('tipo_pago')
+#             notas = request.POST.get('notas', '')
+            
+            
+#             # Validar datos
+#             if not all([cliente_id, prestamo_id, monto, fecha_pago, metodo_pago, tipo_pago]):
+#                 return JsonResponse({'success': False, 'error': 'Faltan campos requeridos'})
+            
+#             # Validar que el préstamo existe y pertenece al cliente
+#             try:
+#                 prestamo = Prestamo.objects.get(pk=prestamo_id, cliente_id=cliente_id)
+#             except Prestamo.DoesNotExist:
+#                 return JsonResponse({'success': False, 'error': 'Préstamo no encontrado'})
+            
+#             # Calcular saldo actual del préstamo
+#             pagos_anteriores = Ingreso.objects.filter(
+#                 prestamo=prestamo
+#             ).aggregate(total=Sum('monto_pago'))['total'] or 0
+            
+#             saldo_actual = prestamo.monto - pagos_anteriores
+            
+#             # Validar que el monto no exceda el saldo
+#             if monto > saldo_actual:
+#                 return JsonResponse({
+#                     'success': False, 
+#                     'error': f'El monto excede el saldo pendiente (RD$ {saldo_actual:.2f})'
+#                 })
+            
+#             # Generar número de recibo único
+#             intentos = 0
+#             max_intentos = 5
+#             ingreso = None
+            
+#             while intentos < max_intentos:
+#                 try:
+#                     # Obtener el último recibo para este préstamo
+#                     ultimo_recibo = Ingreso.objects.filter(
+#                         prestamo=prestamo
+#                     ).order_by('-no_recibo').first()
+                    
+#                     if ultimo_recibo:
+#                         try:
+#                             # Extraer el número secuencial del último recibo
+#                             ultimo_numero = int(ultimo_recibo.no_recibo.split('-')[-1])
+#                             nuevo_numero = f"{ultimo_numero + 1:04d}"
+#                         except (ValueError, IndexError):
+#                             # Si hay algún problema con el formato, empezamos desde 1
+#                             nuevo_numero = "0001"
+#                     else:
+#                         nuevo_numero = "0001"
+                    
+#                     no_recibo = f"PR-{prestamo_id}-{nuevo_numero}"
+                    
+#                     # Crear registro de ingreso
+#                     ingreso = Ingreso(
+#                         no_recibo=no_recibo,
+#                         prestamo=prestamo,
+#                         monto_pago=monto,
+#                         fecha_pago=fecha_pago,
+#                         metodo_pago=metodo_pago,
+#                         tipo_pago=tipo_pago,
+#                         notas=notas
+#                     )
+#                     ingreso.save()
+#                     break
+                    
+#                 except IntegrityError:
+#                     intentos += 1
+#                     if intentos >= max_intentos:
+#                         return JsonResponse({
+#                             'success': False, 
+#                             'error': 'No se pudo generar un número de recibo único después de varios intentos'
+#                         })
+#                     time.sleep(0.1)  # Pequeña pausa antes de reintentar
+            
+#             # Verificar si el préstamo queda completamente pagado
+#             total_pagado_despues = pagos_anteriores + monto
+#             if total_pagado_despues >= prestamo.monto:
+#                 prestamo.estado = 'PAGADO'
+#                 prestamo.save()
+            
+#             return JsonResponse({
+#                 'success': ngreso.get_metodo_pago_display(),
+#                 'tipo': ingreso.get_tipo_pago_display(),
+#                 'saldo_restTrue,
+#                 'recibo': no_recibo,
+#                 'fecha': fecha_pago,
+#                 'monto': float(monto),
+#                 'metodo': ingreso.get_metodo_pago_display(),
+#                 'tipo': ingreso.get_tipo_pago_display(),
+#                 'saldo_restante': float(prestamo.monto - total_pagado_despues)
+#             })
+            
+#         except Exception as e:
+#             return JsonResponse({'success': False, 'error': str(e)})
+    
+#     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+
+
+
+
+
+
 def registrar_pago(request):
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
+            # Obtener datos del formulario (código existente)
             cliente_id = request.POST.get('cliente_id')
             prestamo_id = request.POST.get('prestamo_id')
             monto = Decimal(request.POST.get('monto'))
@@ -277,57 +407,51 @@ def registrar_pago(request):
             tipo_pago = request.POST.get('tipo_pago')
             notas = request.POST.get('notas', '')
             
-            
-            # Validar datos
+            # Validar datos (código existente)
             if not all([cliente_id, prestamo_id, monto, fecha_pago, metodo_pago, tipo_pago]):
                 return JsonResponse({'success': False, 'error': 'Faltan campos requeridos'})
             
-            # Validar que el préstamo existe y pertenece al cliente
             try:
                 prestamo = Prestamo.objects.get(pk=prestamo_id, cliente_id=cliente_id)
+                cliente = Cliente.objects.get(pk=cliente_id)
             except Prestamo.DoesNotExist:
                 return JsonResponse({'success': False, 'error': 'Préstamo no encontrado'})
             
-            # Calcular saldo actual del préstamo
+            # Calcular saldo actual (código existente)
             pagos_anteriores = Ingreso.objects.filter(
                 prestamo=prestamo
             ).aggregate(total=Sum('monto_pago'))['total'] or 0
             
             saldo_actual = prestamo.monto - pagos_anteriores
             
-            # Validar que el monto no exceda el saldo
             if monto > saldo_actual:
                 return JsonResponse({
                     'success': False, 
                     'error': f'El monto excede el saldo pendiente (RD$ {saldo_actual:.2f})'
                 })
             
-            # Generar número de recibo único
+            # Generar número de recibo (código existente)
             intentos = 0
             max_intentos = 5
             ingreso = None
             
             while intentos < max_intentos:
                 try:
-                    # Obtener el último recibo para este préstamo
                     ultimo_recibo = Ingreso.objects.filter(
                         prestamo=prestamo
                     ).order_by('-no_recibo').first()
                     
                     if ultimo_recibo:
                         try:
-                            # Extraer el número secuencial del último recibo
                             ultimo_numero = int(ultimo_recibo.no_recibo.split('-')[-1])
                             nuevo_numero = f"{ultimo_numero + 1:04d}"
                         except (ValueError, IndexError):
-                            # Si hay algún problema con el formato, empezamos desde 1
                             nuevo_numero = "0001"
                     else:
                         nuevo_numero = "0001"
                     
                     no_recibo = f"PR-{prestamo_id}-{nuevo_numero}"
                     
-                    # Crear registro de ingreso
                     ingreso = Ingreso(
                         no_recibo=no_recibo,
                         prestamo=prestamo,
@@ -347,13 +471,75 @@ def registrar_pago(request):
                             'success': False, 
                             'error': 'No se pudo generar un número de recibo único después de varios intentos'
                         })
-                    time.sleep(0.1)  # Pequeña pausa antes de reintentar
+                    time.sleep(0.1)
             
-            # Verificar si el préstamo queda completamente pagado
+            # Verificar si el préstamo queda completamente pagado (código existente)
             total_pagado_despues = pagos_anteriores + monto
             if total_pagado_despues >= prestamo.monto:
                 prestamo.estado = 'PAGADO'
                 prestamo.save()
+            
+            # Generar PDF para impresora térmica de 80mm
+            buffer = BytesIO()
+            
+            # Tamaño para impresora térmica de 80mm (80mm ~ 3.15 inches)
+            width = 80 * mm
+            height = 200 * mm  # Altura dinámica
+            
+            # Crear PDF
+            c = canvas.Canvas(buffer, pagesize=(width, height))
+            c.setFont("Courier", 9)  # Fuente monoespaciada para alineación precisa
+            
+            # Encabezado
+            c.drawCentredString(width/2, height-20, "PRÉSTAMOS FÁCIL")
+            c.drawCentredString(width/2, height-35, "COMPROBANTE DE PAGO")
+            c.line(10 * mm, height-40, 70 * mm, height-40)
+            
+            # Datos del recibo
+            y_position = height - 60
+            c.drawString(10 * mm, y_position, f"No. Recibo: {no_recibo}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Fecha: {fecha_pago}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Cliente: {cliente.nombres} {cliente.apellidos}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Cédula: {cliente.numero_identificacion}")
+            y_position -= 20
+            c.line(10 * mm, y_position, 70 * mm, y_position)
+            
+            # Detalles del pago
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Préstamo: {prestamo.numero_factura or prestamo.id}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Tipo de pago: {ingreso.get_tipo_pago_display()}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Método: {ingreso.get_metodo_pago_display()}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Notas: {notas or '-'}")
+            y_position -= 20
+            c.line(10 * mm, y_position, 70 * mm, y_position)
+            
+            # Montos
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Monto pagado: RD$ {monto:.2f}")
+            y_position -= 15
+            c.drawString(10 * mm, y_position, f"Saldo pendiente: RD$ {prestamo.monto - total_pagado_despues:.2f}")
+            y_position -= 20
+            c.line(10 * mm, y_position, 70 * mm, y_position)
+            
+            # Pie de página
+            y_position -= 15
+            c.drawCentredString(width/2, y_position, "Gracias por su pago")
+            y_position -= 15
+            c.drawCentredString(width/2, y_position, timezone.now().date().strftime("%d/%m/%Y"))
+            y_position -= 15
+            c.drawCentredString(width/2, y_position, "Sistema Préstamos Fácil")
+            
+            c.save()
+            
+            # Obtener el contenido del PDF
+            pdf_content = buffer.getvalue()
+            buffer.close()
             
             return JsonResponse({
                 'success': True,
@@ -362,13 +548,44 @@ def registrar_pago(request):
                 'monto': float(monto),
                 'metodo': ingreso.get_metodo_pago_display(),
                 'tipo': ingreso.get_tipo_pago_display(),
-                'saldo_restante': float(prestamo.monto - total_pagado_despues)
+                'saldo_restante': float(prestamo.monto - total_pagado_despues),
+                'pdf': pdf_content.hex()  # Enviamos el PDF como hexadecimal para el frontend
             })
             
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+
+
+# def obtener_prestamos_cliente(request, cliente_id):
+#     try:
+#         prestamos = Prestamo.objects.filter(cliente_id=cliente_id, estado='ACTIVO')
+        
+#         data = []
+#         for prestamo in prestamos:
+#             # Calcular pagos específicos para este préstamo
+#             pagos_prestamo = Ingreso.objects.filter(
+#                 no_recibo__startswith=f'PR-{prestamo.id}-'
+#             ).aggregate(total=Sum('monto_pago'))['total'] or 0
+            
+#             saldo = prestamo.monto - pagos_prestamo
+#             a.get('id')
+        
+#         cliente = Cliente
+#             data.append({
+#                 'id': prestamo.id,
+#                 'numero_factura': prestamo.numero_factura or f"PR-{prestamo.id}",
+#                 'monto': float(prestamo.monto),
+#                 'pagado': float(pagos_prestamo),
+#                 'saldo': float(saldo),
+#                 'fecha': prestamo.fecha_despacho.strftime('%Y-%m-%d')
+#             })
+        
+#         return JsonResponse({'success': True, 'prestamos': data})
+#     except Exception as e:
+#         return JsonResponse({'success': False, 'error': str(e)})
 
 
 
@@ -402,7 +619,105 @@ def obtener_prestamos_cliente(request, cliente_id):
 
 
 
+def vistadecliente(request):
+    clientes = Cliente.objects.all().annotate(
+        total_monto=Sum('prestamo__monto')
+    )
+    
+    clientes_list = []
+    for cliente in clientes:
+        cliente_data = {
+            'id': cliente.id,
+            'nombres': cliente.nombres,
+            'apellidos': cliente.apellidos,
+            'numero_identificacion': cliente.numero_identificacion,
+            'genero': cliente.genero,
+            'telefono_principal': cliente.telefono_principal,
+            'telefono_secundario': cliente.telefono_secundario,
+            'direccion': cliente.direccion,
+            'ciudad': cliente.ciudad,
+            'provincia': cliente.provincia,
+            'tipo_cuenta': cliente.tipo_cuenta,
+            'ingresos_mensuales': float(cliente.ingresos_mensuales) if cliente.ingresos_mensuales else 0,
+            'empleador': cliente.empleador,
+            'telefono_laboral': cliente.telefono_laboral,
+            'banco_principal': cliente.banco_principal,
+            'numero_cuenta': cliente.numero_cuenta,
+            'total_monto': float(cliente.total_monto) if cliente.total_monto else 0
+        }
+        clientes_list.append(cliente_data)
+    
+    return render(request, "prestamos/vistadecliente.html", {
+        'clientes_json': json.dumps(clientes_list)
+    })
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def editar_cliente(request):
+    try:
+        data = json.loads(request.body)
+        cliente_id = data.get('id')
+        
+        cliente = Cliente.objects.get(id=cliente_id)
+        
+        # Actualizar campos
+        campos = [
+            'nombres', 'apellidos', 'numero_identificacion', 'genero',
+            'telefono_principal', 'telefono_secundario', 'direccion',
+            'ciudad', 'provincia', 'tipo_cuenta', 'ingresos_mensuales',
+            'empleador', 'telefono_laboral', 'banco_principal', 'numero_cuenta'
+        ]
+        
+        for campo in campos:
+            if campo in data:
+                if campo == 'ingresos_mensuales':
+                    setattr(cliente, campo, float(data[campo]))
+                else:
+                    setattr(cliente, campo, data[campo])
+        
+        cliente.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Cliente actualizado correctamente'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=400)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def eliminar_cliente(request):
+    try:
+        data = json.loads(request.body)
+        cliente_id = data.get('id')
+        
+        cliente = Cliente.objects.get(id=cliente_id)
+        Prestamo.objects.filter(cliente=cliente).delete()
+        cliente.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Cliente y préstamos eliminados'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=400)
+
+def obtener_total_prestamos(request):
+    try:
+        cliente_id = request.GET.get('cliente_id')
+        total = Prestamo.objects.filter(cliente_id=cliente_id).aggregate(
+            total=Sum('monto')
+        )['total'] or 0
+        
+        return JsonResponse({'total': total})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 
@@ -917,8 +1232,8 @@ def factura_prestamo(request, prestamo_id):
             'empresa': {
                 'nombre': 'AGRO-JIMENEZ CRUZ, SRL',
                 'direccion': 'Calle Principal #123, CASTAÑUELAS, RD',
-                'rnc': '123-456789-1',
-                'telefono': '809-555-5555'
+                'rnc': '1-31-30660-8',
+                'telefono': '809-979-7847'
             },
             'prestamo': {
                 'numero_factura': prestamo.numero_factura or f"P-{prestamo.id}",

@@ -534,6 +534,15 @@
                 </a>
             </li>
 
+
+             </li><li class="nav-item">
+                    <a href="{% url 'vistadecliente' %}" class="nav-link ">
+                        <i class="fas fa-edit"></i> 
+                        <span>Editar Cliente</span>
+                    </a>
+                </li>
+
+
             <li class="nav-item">
                 <a href="{% url 'anulacion' %}" class="nav-link">
                     <i class="fas fa-times-circle"></i>
@@ -639,7 +648,7 @@
             
             <div class="form-group">
                 <label for="idNumber" class="required">Número de Identificación</label>
-                <input type="text" id="idNumber" name="numero_identificacion" class="form-control" required>
+                <input type="text" id="idNumber" name="numero_identificacion" class="form-control" maxlength="11" required>
                 <span class="error-message">Este campo es requerido</span>
             </div>
             
