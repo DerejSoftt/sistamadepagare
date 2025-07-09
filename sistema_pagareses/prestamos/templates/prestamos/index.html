@@ -1,15 +1,14 @@
 {% load static %}
 
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | Sistema de Préstamos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-     <link rel="shortcut ico" href="{% static "prestamos/lo" %}" type="image/x-ico"> 
-     <link rel="shortcut icon" href="{% static "prestamos/logo2_2" %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'prestamos/logo2_2.png' %}" type="image/x-icon">
+
     <style>
         :root {
             --primary: #2563eb;
@@ -201,7 +200,7 @@
 <body>
     <div class="login-container">
         <div class="logo">
-       <img src="{% static 'prestamos/logo2_2.png' %}" alt="Logo">
+        <img src="{% static 'prestamos/logo2_2.png' %}" alt="Logo">
             <h1>Sistema Préstamos</h1>
             <p>Acceso al panel administrativo</p>
         </div>
@@ -236,7 +235,7 @@
         </form>
         
         <div class="footer-text">
-            &copy; <span id="current-year"></span> Sistema Préstamos. Todos los derechos reservados.
+            &copy; <span id="current-year"></span> Sistema Préstamos. Todos los derechos reservados a DerejSoft.
         </div>
     </div>
 
@@ -286,4 +285,420 @@
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
+</html> -->
+
+
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="Sistema de Préstamos - Panel administrativo">
+    <title>Iniciar Sesión | Sistema de Préstamos</title>
+    <link rel="shortcut icon" href="{% static 'prestamos/' %}" type="image/x-icon">
+    {% comment %} <link rel="manifest" href="{% static 'prestamos/logo2_2.png' %}"> {% endcomment %}
+    <link rel="apple-touch-icon" href="{% static 'prestamos/logo2_.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/sw.js"></script>
+    <link rel="manifest" href="/static/manifest.json">
+
+
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--dark);
+            background: 
+                linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+                url('https://images.unsplash.com/photo-1601597111158-2fceff292cdc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') center/cover no-repeat fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: -1;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+        }
+
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .input-icon {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .input-icon input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-icon input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 2.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            display: none;
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Efectos para pantallas grandes */
+        @media (min-width: 768px) {
+            .login-container {
+                padding: 4rem 3rem;
+            }
+            
+            .login-container::before {
+                top: -30%;
+                right: -30%;
+                width: 80%;
+                height: 160%;
+            }
+        }
+
+        /* Install prompt styling */
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .install-prompt button {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .install-prompt button.close {
+            background: transparent;
+            color: white;
+            border: none;
+            margin-left: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <img src="{% static 'prestamos/logo2_2.png' %}" alt="Logo">
+            <h1>Sistema Préstamos</h1>
+            <p>Acceso al panel administrativo</p>
+        </div>
+        
+        <form id="loginForm" method="POST" action="{% url 'index' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" name="username" placeholder="Ingresa tu usuario" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <div class="input-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña" required>
+                </div>
+            </div>
+            
+            <div id="errorMessage" class="error-message">
+                {% if form.errors %}
+                    Usuario o contraseña incorrectos
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+        </form>
+        
+        <div class="footer-text">
+            &copy; <span id="current-year"></span> Sistema Préstamos. Todos los derechos reservados a DerejSoft.
+        </div>
+    </div>
+
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+        <span>¿Deseas instalar la aplicación?</span>
+        <button id="installButton">Instalar</button>
+        <button class="close" id="closeInstallPrompt">&times;</button>
+    </div>
+
+    <script>
+        // Current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Handle form submission with AJAX for better UX
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+            btn.disabled = true;
+            errorMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const data = await response.json();
+                    if (data.error) {
+                        errorMessage.textContent = data.error;
+                        errorMessage.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = 'Error de conexión con el servidor';
+                errorMessage.style.display = 'block';
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // PWA Installation Logic
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installButton = document.getElementById('installButton');
+        const closeButton = document.getElementById('closeInstallPrompt');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install button
+            installPrompt.style.display = 'flex';
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            // Optionally, send analytics event with outcome of user choice
+            console.log(`User response to the install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, throw it away
+            deferredPrompt = null;
+            // Hide the install button
+            installPrompt.style.display = 'none';
+        });
+
+        closeButton.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            // Hide the install button
+            installPrompt.style.display = 'none';
+            // Clear the deferredPrompt so it can be garbage collected
+            deferredPrompt = null;
+            // Optionally, send analytics event to indicate successful install
+            console.log('PWA was installed');
+        });
+
+        // Service Worker Registration
+        {% comment %} if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('Error al registrar Service Worker:', err);
+                    });
+            });
+        } {% endcomment %}
+    </script>
+</body>
 </html>
+
+
+
+
+
