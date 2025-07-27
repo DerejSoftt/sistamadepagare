@@ -5,9 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reimpresión de Facturas | Sistema de Préstamos</title>
+    <title>Reimpresión de Pagarés | Sistema de Préstamos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-      <link rel="shortcut icon" href="{% static "prestamos/logo.png" %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static "prestamos/logo.png" %}" type="image/x-icon">
     <style>
         :root {
             --primary: #2563eb;
@@ -478,8 +478,8 @@
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'despacho' %}" class="nav-link">
-                        <i class="fas fa-history"></i>
-                        <span>Despacho</span>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Inicial Préstamo</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -494,16 +494,12 @@
                         <span>Préstamos Pagados</span>
                     </a>
                 </li>
-
-
-                </li><li class="nav-item">
-                    <a href="{% url 'vistadecliente' %}" class="nav-link ">
+                <li class="nav-item">
+                    <a href="{% url 'vistadecliente' %}" class="nav-link">
                         <i class="fas fa-edit"></i> 
                         <span>Editar Cliente</span>
                     </a>
                 </li>
-
-
                 <li class="nav-item">
                     <a href="{% url 'anulacion' %}" class="nav-link">
                         <i class="fas fa-times-circle"></i>
@@ -570,47 +566,47 @@
             <form class="reprint-form" id="reprintForm">
                 <div class="form-group">
                     <label for="invoiceId">Número de Pagaré</label>
-                    <input type="text" id="invoiceId" class="form-control" readonly value="{{ ultimo_prestamo.numero_factura|default_if_none:'' }}">
+                    <input type="text" id="invoiceId" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="clientName">Nombre Completo</label>
-                    <input type="text" id="clientName" class="form-control" readonly value="{{ ultimo_prestamo.cliente.nombres }} {{ ultimo_prestamo.cliente.apellidos|default_if_none:'' }}">
+                    <input type="text" id="clientName" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="clientId">Documento de Identidad</label>
-                    <input type="text" id="clientId" class="form-control" readonly value="{{ ultimo_prestamo.cliente.cedula|default_if_none:'' }}">
+                    <input type="text" id="clientId" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="clientAddress">Dirección</label>
-                    <input type="text" id="clientAddress" class="form-control" readonly value="{{ ultimo_prestamo.cliente.direccion|default_if_none:'' }}">
+                    <input type="text" id="clientAddress" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="clientDepartment">Departamento</label>
-                    <input type="text" id="clientDepartment" class="form-control" readonly value="{{ ultimo_prestamo.get_departamento_display|default_if_none:'' }}">
+                    <input type="text" id="clientDepartment" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="originalAmount">Monto (RD$)</label>
-                    <input type="number" id="originalAmount" class="form-control" readonly value="{{ ultimo_prestamo.monto|default_if_none:'' }}">
+                    <input type="number" id="originalAmount" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="transactionDate">Fecha de Emisión</label>
-                    <input type="text" id="transactionDate" class="form-control" readonly value="{{ ultimo_prestamo.fecha_despacho|date:'d/m/Y'|default_if_none:'' }}">
+                    <input type="text" id="transactionDate" class="form-control" readonly>
                 </div>
                 
                 <div class="form-group">
                     <label for="dueDate">Fecha de Vencimiento</label>
-                    <input type="text" id="dueDate" class="form-control" readonly value="{{ ultimo_prestamo.fecha_vencimiento|date:'d/m/Y'|default_if_none:'' }}">
+                    <input type="text" id="dueDate" class="form-control" readonly>
                 </div>
 
                 <div class="form-group">
                     <label for="notes">Observaciones</label>
-                    <textarea id="notes" class="form-control" rows="3" readonly>{{ ultimo_prestamo.observaciones|default_if_none:'' }}</textarea>
+                    <textarea id="notes" class="form-control" rows="3" readonly></textarea>
                 </div>
             </form>
             
@@ -626,189 +622,227 @@
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Control del menú móvil
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+       document.addEventListener('DOMContentLoaded', function() {
+    // Control del menú móvil
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-            function toggleMenu() {
-                sidebar.classList.toggle('active');
-                overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
-                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    function toggleMenu() {
+        sidebar.classList.toggle('active');
+        overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
+    }
+
+    mobileMenuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // Datos de los pagarés desde Django
+    let transactions = [];
+    try {
+        transactions = JSON.parse('{{ prestamos_json|escapejs }}').map(trans => ({
+            id: trans.numero_factura,
+            clientId: trans.cliente_cedula,
+            clientName: `${trans.cliente_nombres} ${trans.cliente_apellidos}`.trim(),
+            address: trans.direccion,
+            department: trans.departamento,
+            amount: trans.monto,
+            date: trans.fecha_despacho,
+            dueDate: trans.fecha_vencimiento,
+            observations: trans.observaciones,
+            estado: trans.estado
+        }));
+    } catch (error) {
+        console.error('Error al cargar datos de préstamos:', error);
+    }
+
+    // Elementos del DOM
+    const clientSearch = document.getElementById('clientSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchResults = document.getElementById('searchResults');
+    const invoiceId = document.getElementById('invoiceId');
+    const clientName = document.getElementById('clientName');
+    const clientId = document.getElementById('clientId');
+    const clientAddress = document.getElementById('clientAddress');
+    const clientDepartment = document.getElementById('clientDepartment');
+    const originalAmount = document.getElementById('originalAmount');
+    const transactionDate = document.getElementById('transactionDate');
+    const dueDate = document.getElementById('dueDate');
+    const notes = document.getElementById('notes');
+    const estadoFactura = document.getElementById('estadoFactura');
+    const reprintForm = document.getElementById('reprintForm');
+    const resetBtn = document.getElementById('resetBtn');
+    const printBtn = document.getElementById('printBtn');
+
+    // Variables para búsqueda debounce
+    let searchTimeout;
+
+    // Función para buscar transacciones
+    function searchTransactions(query) {
+        if (!query || query.trim() === '') {
+            searchResults.style.display = 'none';
+            return [];
+        }
+
+        const lowerQuery = query.toLowerCase().trim();
+        return transactions.filter(trans => {
+            // Buscar en número de factura
+            if (trans.id && trans.id.toLowerCase().includes(lowerQuery)) {
+                return true;
             }
-
-            mobileMenuBtn.addEventListener('click', toggleMenu);
-            overlay.addEventListener('click', toggleMenu);
-
-            // Datos de los pagarés desde Django (con estado)
-            const transactions = [
-                {% for prestamo in prestamos %}
-                { 
-                    id: '{{ prestamo.numero_factura }}', 
-                    clientId: '{{ prestamo.cliente.numero_identificacion }}', 
-                    clientName: '{{ prestamo.cliente.nombres }} {{ prestamo.cliente.apellidos }}', 
-                    address: '{{ prestamo.cliente.direccion }}', 
-                    department: '{{ prestamo.get_departamento_display }}',
-                    amount: {{ prestamo.monto }},
-                    date: '{{ prestamo.fecha_despacho|date:"d/m/Y" }}',
-                    dueDate: '{{ prestamo.fecha_vencimiento|date:"d/m/Y" }}',
-                    paymentMethod: '{{ prestamo.get_metodo_pago_display }}',
-                    observations: '{{ prestamo.observaciones|default_if_none:"" }}',
-                    estado: '{{ prestamo.estado|default:"ACTIVO" }}'
-                },
-                {% endfor %}
-            ];
-
-            // Elementos del DOM
-            const clientSearch = document.getElementById('clientSearch');
-            const searchBtn = document.getElementById('searchBtn');
-            const searchResults = document.getElementById('searchResults');
-            const invoiceId = document.getElementById('invoiceId');
-            const clientName = document.getElementById('clientName');
-            const clientId = document.getElementById('clientId');
-            const clientAddress = document.getElementById('clientAddress');
-            const clientDepartment = document.getElementById('clientDepartment');
-            const originalAmount = document.getElementById('originalAmount');
-            const transactionDate = document.getElementById('transactionDate');
-            const dueDate = document.getElementById('dueDate');
-            const notes = document.getElementById('notes');
-            const estadoFactura = document.getElementById('estadoFactura');
-            const reprintForm = document.getElementById('reprintForm');
-            const resetBtn = document.getElementById('resetBtn');
-            const printBtn = document.getElementById('printBtn');
-
-            // Función para buscar transacciones
-            function searchTransactions(query) {
-                if (!query) {
-                    searchResults.style.display = 'none';
-                    return [];
-                }
-
-                const lowerQuery = query.toLowerCase();
-                return transactions.filter(trans => 
-                    trans.id.toLowerCase().includes(lowerQuery) || 
-                    trans.clientName.toLowerCase().includes(lowerQuery) || 
-                    trans.clientId.includes(query)
-                );
+            
+            // Buscar en nombre completo
+            const fullName = trans.clientName.toLowerCase();
+            if (fullName.includes(lowerQuery)) {
+                return true;
             }
-
-            // Función para mostrar resultados
-            function displayResults(results) {
-                searchResults.innerHTML = '';
-                
-                if (results.length === 0) {
-                    const noResults = document.createElement('div');
-                    noResults.className = 'search-result-item';
-                    noResults.textContent = 'No se encontraron pagarés';
-                    searchResults.appendChild(noResults);
-                } else {
-                    results.forEach(trans => {
-                        const item = document.createElement('div');
-                        item.className = 'search-result-item';
-                        if (trans.estado && trans.estado.toLowerCase() === 'anulado') {
-                            item.classList.add('anulado');
-                        }
-                        
-                        item.innerHTML = `
-                            <div style="font-weight: 600;">
-                                ${trans.id} - ${trans.clientName}
-                                ${trans.estado && trans.estado.toLowerCase() === 'anulado' ? ' (ANULADA)' : ''}
-                            </div>
-                            <div style="font-size: 0.85rem; color: var(--gray);">
-                                ${trans.clientId} - RD$ ${trans.amount.toLocaleString('es-DO')}
-                            </div>
-                        `;
-                        
-                        item.addEventListener('click', () => {
-                            selectTransaction(trans);
-                            searchResults.style.display = 'none';
-                            clientSearch.value = trans.id;
-                        });
-                        
-                        searchResults.appendChild(item);
-                    });
-                }
-                
-                searchResults.style.display = results.length > 0 ? 'block' : 'none';
+            
+            // Buscar en documento
+            if (trans.clientId && trans.clientId.toLowerCase().includes(lowerQuery)) {
+                return true;
             }
-
-            // Función para seleccionar transacción
-            function selectTransaction(trans) {
-                invoiceId.value = trans.id;
-                clientName.value = trans.clientName;
-                clientId.value = trans.clientId;
-                clientAddress.value = trans.address;
-                clientDepartment.value = trans.department;
-                originalAmount.value = trans.amount;
-                transactionDate.value = trans.date;
-                dueDate.value = trans.dueDate;
-                notes.value = trans.observations;
-                
-                // Manejar estado anulado
-                if (trans.estado && trans.estado.toLowerCase() === 'anulado') {
-                    estadoFactura.style.display = 'inline';
-                    printBtn.classList.remove('btn-primary');
-                    printBtn.classList.add('btn-danger');
-                    printBtn.href = '#';
-                } else {
-                    estadoFactura.style.display = 'none';
-                    printBtn.classList.remove('btn-danger');
-                    printBtn.classList.add('btn-primary');
-                    printBtn.href = `/imprimir-pagare/${trans.id}/`;
-                }
-            }
-
-            // Evento para imprimir
-            printBtn.addEventListener('click', function(e) {
-                if (!invoiceId.value) {
-                    alert('Por favor seleccione un pagaré para imprimir');
-                    e.preventDefault();
-                    return;
-                }
-                
-                const transSeleccionada = transactions.find(t => t.id === invoiceId.value);
-                
-                if (transSeleccionada && transSeleccionada.estado && transSeleccionada.estado.toLowerCase() === 'anulado') {
-                    alert('¡ATENCIÓN! Esta factura ha sido ANULADA y no puede ser impresa');
-                    e.preventDefault();
-                    return;
-                }
-            });
-
-            // Resetear formulario
-            resetBtn.addEventListener('click', () => {
-                reprintForm.reset();
-                if (transactions.length > 0) {
-                    selectTransaction(transactions[0]);
-                }
-                clientSearch.value = '';
-                clientSearch.focus();
-            });
-
-            // Event listeners
-            clientSearch.addEventListener('input', () => {
-                const results = searchTransactions(clientSearch.value);
-                displayResults(results);
-            });
-
-            searchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const results = searchTransactions(clientSearch.value);
-                displayResults(results);
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-container')) {
-                    searchResults.style.display = 'none';
-                }
-            });
-
-            // Inicializar con el último préstamo
-            if (transactions.length > 0) {
-                selectTransaction(transactions[0]);
-            }
+            
+            return false;
         });
+    }
+
+    // Función para mostrar resultados
+    function displayResults(results) {
+        searchResults.innerHTML = '';
+        
+        if (results.length === 0) {
+            const noResults = document.createElement('div');
+            noResults.className = 'search-result-item';
+            noResults.textContent = 'No se encontraron pagarés con ese criterio';
+            searchResults.appendChild(noResults);
+            searchResults.style.display = 'block';
+        } else {
+            results.forEach(trans => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                if (trans.estado && trans.estado.toLowerCase() === 'anulado') {
+                    item.classList.add('anulado');
+                }
+                
+                item.innerHTML = `
+                    <div style="font-weight: 600;">
+                        ${trans.id} - ${trans.clientName}
+                        ${trans.estado && trans.estado.toLowerCase() === 'anulado' ? ' (ANULADA)' : ''}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--gray);">
+                        ${trans.clientId} - RD$ ${trans.amount.toLocaleString('es-DO')}
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    selectTransaction(trans);
+                    searchResults.style.display = 'none';
+                    clientSearch.value = trans.id;
+                });
+                
+                searchResults.appendChild(item);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+    }
+
+    // Función para seleccionar transacción
+    function selectTransaction(trans) {
+        if (!trans) return;
+        
+        invoiceId.value = trans.id || '';
+        clientName.value = trans.clientName || '';
+        clientId.value = trans.clientId || '';
+        clientAddress.value = trans.address || '';
+        clientDepartment.value = trans.department || '';
+        originalAmount.value = trans.amount || 0;
+        transactionDate.value = trans.date || '';
+        dueDate.value = trans.dueDate || '';
+        notes.value = trans.observations || '';
+        
+        // Manejar estado anulado
+        if (trans.estado && trans.estado.toLowerCase() === 'anulado') {
+            estadoFactura.style.display = 'inline';
+            printBtn.classList.remove('btn-primary');
+            printBtn.classList.add('btn-danger');
+            printBtn.href = '#';
+        } else {
+            estadoFactura.style.display = 'none';
+            printBtn.classList.remove('btn-danger');
+            printBtn.classList.add('btn-primary');
+            printBtn.href = `/imprimir-pagare/${trans.id}/`;
+        }
+    }
+
+    // Evento para imprimir
+    printBtn.addEventListener('click', function(e) {
+        if (!invoiceId.value) {
+            alert('Por favor seleccione un pagaré para imprimir');
+            e.preventDefault();
+            return;
+        }
+        
+        const transSeleccionada = transactions.find(t => t.id === invoiceId.value);
+        
+        if (transSeleccionada && transSeleccionada.estado && transSeleccionada.estado.toLowerCase() === 'anulado') {
+            alert('¡ATENCIÓN! Este pagaré ha sido ANULADO y no puede ser impreso');
+            e.preventDefault();
+            return;
+        }
+    });
+
+    // Resetear formulario
+    resetBtn.addEventListener('click', () => {
+        reprintForm.reset();
+        clientSearch.value = '';
+        searchResults.style.display = 'none';
+        clientSearch.focus();
+    });
+
+    // Event listeners para búsqueda
+    clientSearch.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const results = searchTransactions(clientSearch.value);
+            displayResults(results);
+        }, 300);
+    });
+
+    searchBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const results = searchTransactions(clientSearch.value);
+        displayResults(results);
+    });
+
+    // Ocultar resultados al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+            searchResults.style.display = 'none';
+        }
+    });
+
+    // Inicializar con el último préstamo si existe
+    {% if ultimo_prestamo %}
+    selectTransaction({
+        id: '{{ ultimo_prestamo.numero_factura }}',
+        clientId: '{{ ultimo_prestamo.cliente.numero_identificacion }}',
+        clientName: '{{ ultimo_prestamo.cliente.nombres }} {{ ultimo_prestamo.cliente.apellidos|default_if_none:"" }}',
+        address: '{{ ultimo_prestamo.cliente.direccion|default_if_none:"" }}',
+        department: '{{ ultimo_prestamo.get_departamento_display|default_if_none:"" }}',
+        amount: {{ ultimo_prestamo.monto|default_if_none:"0" }},
+        date: '{{ ultimo_prestamo.fecha_despacho|date:"d/m/Y" }}',
+        dueDate: '{{ ultimo_prestamo.fecha_vencimiento|date:"d/m/Y" }}',
+        observations: '{{ ultimo_prestamo.observaciones|default_if_none:"" }}',
+        estado: '{{ ultimo_prestamo.estado|default:"ACTIVO" }}'
+    });
+    {% endif %}
+
+    // Enfocar el campo de búsqueda al cargar la página
+    clientSearch.focus();
+});
     </script>
 </body>
 </html>
+
+

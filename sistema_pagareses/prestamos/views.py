@@ -56,12 +56,13 @@ from reportlab.lib.units import mm
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from django.views.decorators.csrf import csrf_exempt
+import logging
 
+from django.views.decorators.http import require_POST
 
-
-
-
-@login_required
+@csrf_exempt
+# @login_required
 def formulario(request):
     if request.method == 'POST':
         data = request.POST
@@ -226,7 +227,6 @@ def clientes(request):
     }
     
     return render(request, "prestamos/clientes.html", context)
-
 
 
 def cliente_detalle(request, cliente_id):
@@ -394,7 +394,7 @@ def cliente_detalle(request, cliente_id):
 
 
 
-
+@csrf_exempt
 def registrar_pago(request):
     if request.method == 'POST':
         try:
@@ -721,17 +721,133 @@ def obtener_total_prestamos(request):
 
 
 
+# Este es el apatartado de imprimir
+
+# @csrf_exempt
+# def reimprimir(request):
+#     # Obtener el último préstamo registrado
+#     ultimo_prestamo = Prestamo.objects.order_by('-fecha_registro').first()
+    
+#     # Obtener todos los préstamos para la búsqueda
+#     prestamos = Prestamo.objects.all().order_by('-fecha_registro')
+    
+#     # Datos de la empresa (deberías configurarlos en settings.py o en un modelo)
+#     empresa = {
+#         'nombre': getattr(settings, 'EMPRESA_NOMBRE', 'Mi Empresa'),
+#         'direccion': getattr(settings, 'EMPRESA_DIRECCION', 'Calle Principal #123'),
+#         'rnc': getattr(settings, 'EMPRESA_RNC', '123456789'),
+#         'telefono': getattr(settings, 'EMPRESA_TELEFONO', '809-555-5555'),
+#     }
+    
+#     context = {
+#         'ultimo_prestamo': ultimo_prestamo,
+#         'prestamos': prestamos,
+#         'empresa': empresa,
+#     }
+#     return render(request, "prestamos/reimprimir.html", context)
 
 
 
+
+
+# @csrf_exempt
+# def imprimir_pagare(request, numero_factura):
+#     prestamo = get_object_or_404(Prestamo, numero_factura=numero_factura)
+    
+#     # Datos de la empresa (configurar en settings.py)
+#     empresa = {
+#         'nombre': getattr(settings, 'EMPRESA_NOMBRE', 'AGRO-JIMENEZ CRUZ, SRL'),
+#         'direccion': getattr(settings, 'EMPRESA_DIRECCION', 'Calle Principal #123, CASTAÑUELAS, RD'),
+#         'rnc': getattr(settings, 'EMPRESA_RNC', '123-456789-11'),
+#         'telefono': getattr(settings, 'EMPRESA_TELEFONO', '808-555-5555'),
+#     }
+    
+#     # Convertir monto a letras
+#     try:
+#         monto_letras = num2words(float(prestamo.monto), lang='es').upper() + " PESOS DOMINICANOS CON 00/100"
+#     except:
+#         monto_letras = ""
+
+#     context = {
+#         'empresa': empresa,
+#         'prestamo': {
+#             'numero_factura': prestamo.numero_factura,
+#             'fecha': prestamo.fecha_despacho.strftime('%d/%m/%Y'),
+#             'fecha_vencimiento': prestamo.fecha_vencimiento.strftime('%d/%m/%Y'),
+#             'monto': "{:,.2f}".format(float(prestamo.monto)),
+#             'monto_letras': monto_letras,
+#             'departamento': prestamo.get_departamento_display(),
+#             'observaciones': prestamo.observaciones or '',
+#         },
+#         'cliente': {
+#             'nombre_completo': f"{prestamo.cliente.nombres} {prestamo.cliente.apellidos or ''}",
+#             'documento': prestamo.cliente.numero_identificacion,
+#             'direccion': prestamo.cliente.direccion,
+#         }
+#     }
+
+#     return render(request, 'prestamos/facturas.html', context)
+# #Fin del Apartado de imprimir
+
+# # Aartado de Registro de Pago
+@csrf_exempt
+def registrodepago(request):
+    # Obtener todos los préstamos con sus pagos relacionados
+    prestamos = Prestamo.objects.select_related('cliente').prefetch_related('pagos').all()
+    
+    # Calcular campos adicionales para cada préstamo
+    for prestamo in prestamos:
+        # Calcular total pagado
+        prestamo.total_pagado = sum(pago.monto_pago for pago in prestamo.pagos.all())
+        
+        # Calcular saldo pendiente
+        prestamo.saldo_pendiente = prestamo.monto - prestamo.total_pagado
+        
+        # Calcular progreso de pago (porcentaje)
+        prestamo.progreso_pago = (prestamo.total_pagado / prestamo.monto) * 100 if prestamo.monto > 0 else 0
+        
+        # Determinar estado basado en fechas y pagos
+        hoy = timezone.now().date()
+        if prestamo.progreso_pago >= 100:
+            prestamo.estado = 'COMPLETADO'
+        elif prestamo.fecha_vencimiento < hoy:
+            prestamo.estado = 'ATRASADO'
+        else:
+            prestamo.estado = 'ACTIVO'
+    
+    context = {
+        'prestamos': prestamos
+    }
+    return render(request, "prestamos/registrodepago.html", context)
+
+# codigo de prueva para reeimprimir
+
+@csrf_exempt
 def reimprimir(request):
     # Obtener el último préstamo registrado
     ultimo_prestamo = Prestamo.objects.order_by('-fecha_registro').first()
     
     # Obtener todos los préstamos para la búsqueda
-    prestamos = Prestamo.objects.all().order_by('-fecha_registro')
+    prestamos = Prestamo.objects.select_related('cliente').all().order_by('-fecha_registro')
     
-    # Datos de la empresa (deberías configurarlos en settings.py o en un modelo)
+    # Preparar los datos para el template
+    prestamos_data = []
+    for prestamo in prestamos:
+        prestamos_data.append({
+            'numero_factura': prestamo.numero_factura or '',
+            'cliente_cedula': prestamo.cliente.numero_identificacion or '',
+            'cliente_nombres': prestamo.cliente.nombres or '',
+            'cliente_apellidos': prestamo.cliente.apellidos or '',
+            'direccion': prestamo.cliente.direccion or '',
+            'departamento': prestamo.get_departamento_display() or '',
+            'monto': float(prestamo.monto) if prestamo.monto else 0,
+            'fecha_despacho': prestamo.fecha_despacho.strftime('%d/%m/%Y') if prestamo.fecha_despacho else '',
+            'fecha_vencimiento': prestamo.fecha_vencimiento.strftime('%d/%m/%Y') if prestamo.fecha_vencimiento else '',
+            'observaciones': prestamo.observaciones or '',
+            'estado': prestamo.estado or 'ACTIVO'
+        })
+    
+    # Datos de la empresa
     empresa = {
         'nombre': getattr(settings, 'EMPRESA_NOMBRE', 'Mi Empresa'),
         'direccion': getattr(settings, 'EMPRESA_DIRECCION', 'Calle Principal #123'),
@@ -741,17 +857,16 @@ def reimprimir(request):
     
     context = {
         'ultimo_prestamo': ultimo_prestamo,
-        'prestamos': prestamos,
+        'prestamos_json': json.dumps(prestamos_data, ensure_ascii=False),
         'empresa': empresa,
     }
     return render(request, "prestamos/reimprimir.html", context)
 
-
-
+@csrf_exempt
 def imprimir_pagare(request, numero_factura):
     prestamo = get_object_or_404(Prestamo, numero_factura=numero_factura)
     
-    # Datos de la empresa (configurar en settings.py)
+    # Datos de la empresa
     empresa = {
         'nombre': getattr(settings, 'EMPRESA_NOMBRE', 'AGRO-JIMENEZ CRUZ, SRL'),
         'direccion': getattr(settings, 'EMPRESA_DIRECCION', 'Calle Principal #123, CASTAÑUELAS, RD'),
@@ -785,40 +900,7 @@ def imprimir_pagare(request, numero_factura):
 
     return render(request, 'prestamos/facturas.html', context)
 
-
-
-def registrodepago(request):
-    # Obtener todos los préstamos con sus pagos relacionados
-    prestamos = Prestamo.objects.select_related('cliente').prefetch_related('pagos').all()
-    
-    # Calcular campos adicionales para cada préstamo
-    for prestamo in prestamos:
-        # Calcular total pagado
-        prestamo.total_pagado = sum(pago.monto_pago for pago in prestamo.pagos.all())
-        
-        # Calcular saldo pendiente
-        prestamo.saldo_pendiente = prestamo.monto - prestamo.total_pagado
-        
-        # Calcular progreso de pago (porcentaje)
-        prestamo.progreso_pago = (prestamo.total_pagado / prestamo.monto) * 100 if prestamo.monto > 0 else 0
-        
-        # Determinar estado basado en fechas y pagos
-        hoy = timezone.now().date()
-        if prestamo.progreso_pago >= 100:
-            prestamo.estado = 'COMPLETADO'
-        elif prestamo.fecha_vencimiento < hoy:
-            prestamo.estado = 'ATRASADO'
-        else:
-            prestamo.estado = 'ACTIVO'
-    
-    context = {
-        'prestamos': prestamos
-    }
-    return render(request, "prestamos/registrodepago.html", context)
-
-
-
-
+#fin de la prueva de reeimprimir
 
 def prestamospagados(request):
     # Obtener todos los préstamos con estado "PAGADO"
@@ -864,6 +946,9 @@ def delete_loan(request, loan_id):
 
 def despacho(request):
     return render(request, "prestamos/despacho.html")
+
+
+
 
 
 @csrf_exempt
@@ -1050,6 +1135,9 @@ def generar_numero_factura(departamento):
     
     return numero_factura
 
+
+
+
 @csrf_exempt
 def registrar_despacho(request):
     if request.method == 'POST':
@@ -1139,6 +1227,11 @@ def registrar_despacho(request):
 def despacho(request):
     return render(request, "prestamos/despacho.html")
 
+
+
+
+
+@csrf_exempt
 def anulacion(request):
     # Obtener el último préstamo activo para mostrar por defecto
     ultimo_prestamo = Prestamo.objects.filter(estado='ACTIVO').order_by('-fecha_registro').first()
@@ -1168,6 +1261,10 @@ def anulacion(request):
         'ultimo_prestamo': ultimo_prestamo
     }
     return render(request, "prestamos/anulacion.html", context)
+
+
+
+
 
 def buscar_facturas(request):
     if request.GET.get('q'):
@@ -1260,7 +1357,10 @@ def factura_prestamo(request, prestamo_id):
         print(error_msg)
         return HttpResponse(error_msg, status=500)
 
+
+
 @require_http_methods(["GET", "POST"])
+@csrf_exempt
 def index(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -1446,91 +1546,153 @@ def cancel_receipt(request):
     
 
 
+@csrf_exempt
+@require_POST
+@login_required
+@transaction.atomic
+def anular_recibo(request):
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Validar datos del POST
+        no_recibo = request.POST.get('no_recibo', '').strip()
+        motivo = request.POST.get('motivo', '').strip()
+        notas = request.POST.get('notas', '').strip()
+        fecha_anulacion = request.POST.get('fecha_anulacion', timezone.now().strftime('%Y-%m-%d'))
+
+        if not all([no_recibo, motivo, notas]):
+            return JsonResponse({
+                "success": False,
+                "error": "Faltan campos requeridos: no_recibo, motivo, notas"
+            }, status=400)
+
+        # Buscar el recibo a anular
+        try:
+            ingreso = Ingreso.objects.select_related('prestamo').get(
+                no_recibo=no_recibo,
+                anulado=False
+            )
+        except Ingreso.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "error": "Recibo no encontrado o ya anulado"
+            }, status=404)
+
+        # Verificar que tenga un préstamo asociado
+        if not ingreso.prestamo:
+            return JsonResponse({
+                "success": False,
+                "error": "Este recibo no está asociado a un préstamo"
+            }, status=400)
+
+        # 1. Crear registro en RecibosAnulados
+        recibo_anulado = RecibosAnulados.objects.create(
+            no_recibo=ingreso.no_recibo,
+            prestamo=ingreso.prestamo,
+            monto_pago=ingreso.monto_pago,
+            fecha_pago=ingreso.fecha_pago,
+            metodo_pago=ingreso.metodo_pago,
+            tipo_pago=ingreso.tipo_pago,
+            notas=ingreso.notas,
+            fecha_registro=ingreso.fecha_registro,
+            motivo_anulacion=motivo,
+            notas_anulacion=notas,
+            fecha_anulacion=fecha_anulacion,
+            anulado_por=request.user
+        )
+
+        # 2. Actualizar el préstamo (aumentar saldo)
+        prestamo = ingreso.prestamo
+        saldo_anterior = prestamo.saldo
+        prestamo.saldo += ingreso.monto_pago
+        prestamo.save()
+
+        # 3. Marcar el ingreso como anulado
+        ingreso.anulado = True
+        ingreso.motivo_anulacion = motivo
+        ingreso.notas_anulacion = notas
+        ingreso.fecha_anulacion = fecha_anulacion
+        ingreso.anulado_por = request.user
+        ingreso.save()
+
+        # Preparar respuesta
+        response_data = {
+            "success": True,
+            "data": {
+                "numero_recibo": ingreso.no_recibo,
+                "monto_revertido": float(ingreso.monto_pago),
+                "saldo_anterior": float(saldo_anterior),
+                "nuevo_saldo": float(prestamo.saldo),
+                "fecha_anulacion": fecha_anulacion,
+                "cliente_info": {
+                    "id": prestamo.cliente.id,
+                    "nombre": str(prestamo.cliente)
+                }
+            }
+        }
+
+        logger.info(f"Anulación exitosa: {response_data}")
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        logger.error(f"Error anulando recibo: {str(e)}", exc_info=True)
+        return JsonResponse({
+            "success": False,
+            "error": "Error interno del servidor"
+        }, status=500)
+
 
 
 
 @csrf_exempt
-@require_http_methods(["POST"])
-@login_required
-def anular_recibo(request):
-    try:
-        # Manejar diferentes tipos de contenido (FormData y JSON)
-        if request.content_type == 'application/json':
-            data = json.loads(request.body)
-        else:
-            data = request.POST
-
-        # Validar datos requeridos
-        required_fields = ['no_recibo', 'motivo', 'notas', 'fecha_anulacion']
-        if not all(field in data for field in required_fields):
-            return JsonResponse({
-                'success': False,
-                'error': 'Faltan campos requeridos: no_recibo, motivo, notas, fecha_anulacion'
-            }, status=400)
-
-        no_recibo = data['no_recibo']
-        motivo = data['motivo']
-        notas = data['notas']
-        fecha_anulacion = data['fecha_anulacion']
-
-        # Validar formato de fecha
+def estadosdecuentas(request):
+    if request.method == 'POST':
         try:
-            fecha_anulacion = datetime.strptime(fecha_anulacion, '%Y-%m-%d').date()
-        except ValueError:
-            return JsonResponse({
-                'success': False,
-                'error': 'Formato de fecha inválido. Use YYYY-MM-DD'
-            }, status=400)
-
-        # Usar transacción atómica para asegurar integridad
-        with transaction.atomic():
-            # Buscar el recibo (solo no anulados)
-            recibo = Ingreso.objects.select_for_update().get(
-                no_recibo=no_recibo,
-                anulado=False
-            )
-
-            # Crear copia en RecibosAnulados
-            recibo_anulado = RecibosAnulados(
-                no_recibo=recibo.no_recibo,
-                prestamo=recibo.prestamo,
-                monto_pago=recibo.monto_pago,
-                fecha_pago=recibo.fecha_pago,
-                metodo_pago=recibo.metodo_pago,
-                tipo_pago=recibo.tipo_pago,
-                notas=recibo.notas,
-                fecha_registro=recibo.fecha_registro,
-                motivo_anulacion=motivo,
-                notas_anulacion=notas,
-                fecha_anulacion=fecha_anulacion,
-                anulado_por=request.user
-            )
-            recibo_anulado.save()
-
-            # Eliminar el recibo original
-            recibo.delete()
-
-            # Respuesta exitosa con más detalles
-            return JsonResponse({
-                'success': True,
-                'message': 'Recibo anulado exitosamente',
-                'data': {
-                    'id_anulado': recibo_anulado.id,
-                    'numero_recibo': recibo_anulado.no_recibo,
-                    'monto': float(recibo_anulado.monto_pago),
-                    'fecha_anulacion': recibo_anulado.fecha_anulacion.strftime('%Y-%m-%d'),
-                    'motivo': recibo_anulado.motivo_anulacion,
-                    'anulado_por': request.user.username
-                }
-            })
-
-    except Ingreso.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'error': 'Recibo no encontrado o ya está anulado'
-        }, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f'Error al procesar la anulación: {str(e)}'
-        }, status=500)
+            data = json.loads(request.body)
+            action = data.get('action')
+            
+            if action == 'get_prestamos':
+                cliente_id = data.get('cliente_id')
+                
+                prestamos = Prestamo.objects.filter(
+                    cliente_id=cliente_id,
+                    estado__in=['ACTIVO', 'PAGADO']
+                ).annotate(
+                    total_pagado=Sum(
+                        'pagos__monto_pago',
+                        filter=Q(pagos__anulado=False),
+                        default=0
+                    ),
+                    saldo_pendiente=F('monto') - F('total_pagado')
+                ).order_by('-fecha_despacho')
+                
+                prestamos_data = []
+                for prestamo in prestamos:
+                    estado = 'PAGADO' if prestamo.saldo_pendiente <= 0 else 'PENDIENTE'
+                    
+                    # Formatear fecha directamente en el backend
+                    fecha_despacho = prestamo.fecha_despacho.strftime('%d/%m/%Y')
+                    
+                    prestamos_data.append({
+                        'id': prestamo.id,
+                        'numero_factura': prestamo.numero_factura,
+                        'fecha_despacho': fecha_despacho,  # Ya formateada
+                        'monto': float(prestamo.monto),
+                        'total_pagado': float(prestamo.total_pagado),
+                        'saldo_pendiente': float(prestamo.saldo_pendiente),
+                        'estado': estado,
+                        'anulado': prestamo.estado == 'ANULADO'
+                    })
+                
+                return JsonResponse({
+                    'success': True,
+                    'prestamos': prestamos_data
+                })
+                
+            return JsonResponse({'success': False, 'error': 'Acción no válida'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    clientes = Cliente.objects.all()[:100]
+    return render(request, "prestamos/estadosdecuentas.html", {'clientes': clientes})

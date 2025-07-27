@@ -1,6 +1,8 @@
-from django.urls import path
+from django.urls import path, include
+from django.conf.urls.i18n import i18n_patterns
 from . import views
-
+from django.contrib import admin
+from django_prometheus import exports
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -18,9 +20,6 @@ urlpatterns = [
     path('buscar-clientes/', views.buscar_clientes, name='buscar_clientes'),
     path('registrar-despacho/', views.registrar_despacho, name='registrar_despacho'),
     path('factura/<int:prestamo_id>/', views.factura_prestamo, name='factura_prestamo'),
- 
-
-
 
     path('clientes/', views.clientes, name='clientes'),
     path('clientes/<int:cliente_id>/', views.cliente_detalle, name='cliente_detalle'),
@@ -40,7 +39,11 @@ urlpatterns = [
     path('clientes/eliminar/', views.eliminar_cliente, name='eliminar_cliente'),
     path('clientes/total-prestamos/', views.obtener_total_prestamos, name='total_prestamos'),
 
-
+    path("estadosdecuentas", views.estadosdecuentas, name="estadosdecuentas"),
+    
 ]
 
 
+# urlpatterns += [
+#     path('metrics/', exports.ExportToDjangoView, name="metrics")
+# ]

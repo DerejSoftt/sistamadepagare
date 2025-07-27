@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_prometheus',
+    #'sistamadepagare.prestamos'
 ]
 
 MIDDLEWARE = [
@@ -55,6 +57,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'sistema_pagareses.urls'
@@ -86,6 +90,7 @@ WSGI_APPLICATION = 'sistema_pagareses.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        #'ENGINE': 'django_prometheus.db.backends.mysql',
         'NAME': 'financiera',       # Nombre de tu BD
         'USER': 'root',             # Usuario MySQL
         'PASSWORD': 'Almagedon666@',    # Contraseña que estableciste
@@ -127,6 +132,17 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+#USE_L10N = True
+
+# LANGUAGES = [
+#     ('en-us', 'English (US)'),
+#     ('es', 'Español'),
+# ]
+
+# LOCALE_PATHS = [
+#     BASE_DIR / "locale",
+# ]
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -140,9 +156,6 @@ STATICFILES_DIRS = [
 ]
 
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 
 
 
@@ -152,3 +165,19 @@ CSRF_COOKIE_SECURE = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+
+
+# CSRF_COOKIE_SECURE = False  # Para HTTP
+# SESSION_COOKIE_SECURE = False  # Para HTTP
+# CSRF_TRUSTED_ORIGINS = ['http://192.168.0.100', 'http://localhost', 'http://127.0.0.1']
+
+
+
+# settings.py
+# Configuración mínima para sesiones HTTP
+SESSION_COOKIE_SECURE = False  # Permitir cookies en HTTP
+CSRF_COOKIE_SECURE = False     # Permitir CSRF en HTTP
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None  # Desactivar política COOP
+
+# Configuración de autenticación
+LOGIN_URL = '/'  # Usa tu vista index como login
